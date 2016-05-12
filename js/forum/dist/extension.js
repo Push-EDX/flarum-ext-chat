@@ -61,17 +61,17 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 }, {
                     key: 'focus',
                     value: function focus(e) {
-                        e.target.parentNode.className = "chat active";
+                        e.target.parentNode.className = "frame active";
                     }
                 }, {
                     key: 'blur',
                     value: function blur(e) {
-                        e.target.parentNode.className = "chat";
+                        e.target.parentNode.className = "frame";
                     }
                 }, {
                     key: 'view',
                     value: function view() {
-                        return m('div', { className: 'chat', id: 'chat', onmousedown: this.checkFocus.bind(this), onclick: this.setFocus.bind(this) }, [m('div', { id: 'chat-header' }, [m('h2', 'PushEdx Chat')]), m('input', { type: 'text', id: 'chat-input', onfocus: this.focus.bind(this), onblur: this.blur.bind(this) }), this.loading ? LoadingIndicator.component({ className: 'loading Button-icon' }) : m('span'), m('div', { className: 'wrapper' })]);
+                        return m('div', { className: 'chat left container' }, [m('div', { className: 'frame', id: 'chat', onmousedown: this.checkFocus.bind(this), onclick: this.setFocus.bind(this) }, [m('div', { id: 'chat-header' }, [m('h2', 'PushEdx Chat')]), m('input', { type: 'text', id: 'chat-input', onfocus: this.focus.bind(this), onblur: this.blur.bind(this) }), this.loading ? LoadingIndicator.component({ className: 'loading Button-icon' }) : m('span'), m('div', { className: 'wrapper' })])]);
                     }
                 }, {
                     key: 'process',
