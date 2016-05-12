@@ -28,7 +28,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 }, {
                     key: 'getChat',
                     value: function getChat(el) {
-                        return el.id == 'chat' ? el : el.parentNode.id == 'chat' ? el.parentNode : el.parentNode.parentNode;
+                        return el.id == 'chat' ? el : typeof el.parentNode !== 'undefined' ? this.getChat(el.parentNode) : null;
                     }
                 }, {
                     key: 'checkFocus',

@@ -17,7 +17,7 @@ export default class ChatFrame extends Component {
      */
     getChat(el) {
         return (el.id == 'chat') ? el :
-            ((el.parentNode.id == 'chat') ? el.parentNode : el.parentNode.parentNode);
+            ((typeof el.parentNode !== 'undefined') ? this.getChat(el.parentNode) : null);
     }
 
     /**
