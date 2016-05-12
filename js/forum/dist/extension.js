@@ -26,19 +26,52 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         this.loading = false;
                     }
                 }, {
+                    key: 'getChat',
+                    value: function getChat(el) {
+                        return el.id == 'chat' ? el : el.parentNode.id == 'chat' ? el.parentNode : el.parentNode.parentNode;
+                    }
+                }, {
+                    key: 'checkFocus',
+                    value: function checkFocus(e) {
+                        // Get the chat div from the event target
+                        var chat = this.getChat(e.target);
+
+                        if (chat.className.indexOf("active") >= 0) {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            return;
+                        }
+                    }
+                }, {
+                    key: 'setFocus',
+                    value: function setFocus(e) {
+                        // Get the chat div from the event target
+                        var chat = this.getChat(e.target);
+
+                        // Find the input element
+                        for (var i = 0; i < chat.children.length; ++i) {
+                            var el = chat.children[i];
+                            if (el.tagName.toLowerCase() == 'input') {
+                                // Focus it
+                                el.focus();
+                            }
+                        }
+                    }
+                }, {
                     key: 'focus',
                     value: function focus(e) {
-                        e.target.parentNode.parentNode.className = "chat active";
+                        e.target.parentNode.className = "chat active";
                     }
                 }, {
                     key: 'blur',
                     value: function blur(e) {
-                        e.target.parentNode.parentNode.className = "chat";
+                        e.target.parentNode.className = "chat";
                     }
                 }, {
                     key: 'view',
                     value: function view() {
-                        return m('div', { className: 'chat', id: 'chat' }, [m('div', { id: 'chat-header' }, [m('h2', 'PushEdx Chat'), m('input', { type: 'text', id: 'chat-input', onfocus: this.focus, onblur: this.blur }), this.loading ? LoadingIndicator.component({ className: 'loading Button-icon' }) : m('span'), m('div', { className: 'wrapper' })])]);
+                        return m('div', { className: 'chat', id: 'chat', onmousedown: this.checkFocus.bind(this), onclick: this.setFocus.bind(this) }, [m('div', { id: 'chat-header' }, [m('h2', 'PushEdx Chat')]), m('input', { type: 'text', id: 'chat-input', onfocus: this.focus.bind(this), onblur: this.blur.bind(this) }), this.loading ? LoadingIndicator.component({ className: 'loading Button-icon' }) : m('span'), m('div', { className: 'wrapper' })]);
                     }
                 }, {
                     key: 'process',

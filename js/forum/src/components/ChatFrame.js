@@ -12,27 +12,73 @@ export default class ChatFrame extends Component {
         this.loading = false;
     }
 
-    focus(e) {
-        e.target.parentNode.parentNode.className = "chat active";
-    }
-
-    blur(e) {
-        e.target.parentNode.parentNode.className = "chat";
+    /**
+     * Gets the chat element from the current element
+     */
+    getChat(el) {
+        return (el.id == 'chat') ? el :
+            ((el.parentNode.id == 'chat') ? el.parentNode : el.parentNode.parentNode);
     }
 
     /**
-     * Show the actual Upload Button.
+     * If the chat is already focused, ignore this click!
+     */
+    checkFocus(e) {
+        // Get the chat div from the event target
+        var chat = this.getChat(e.target);
+
+        if (chat.className.indexOf("active") >= 0) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            return;
+        }
+    }
+
+    /**
+     * Sets the focus to the input when clicking the chat
+     */
+    setFocus(e) {
+        // Get the chat div from the event target
+        var chat = this.getChat(e.target);
+
+        // Find the input element
+        for (let i = 0; i < chat.children.length; ++i) {
+            let el = chat.children[i];
+            if (el.tagName.toLowerCase() == 'input') {
+                // Focus it
+                el.focus();
+            }
+        }
+    }
+
+    /**
+     * Sets the "active" class to the chat element
+     */
+    focus(e) {
+        e.target.parentNode.className = "chat active";
+    }
+
+    /**
+     * Remove the "active" class from the chat element
+     */
+    blur(e) {
+        e.target.parentNode.className = "chat";
+    }
+
+    /**
+     * Show the actual Chat Frame.
      *
      * @returns {*}
      */
     view() {
-        return m('div', {className: 'chat', id: 'chat'}, [
+        return m('div', {className: 'chat', id: 'chat', onmousedown: this.checkFocus.bind(this), onclick: this.setFocus.bind(this) }, [
             m('div', {id: 'chat-header'}, [
                 m('h2', 'PushEdx Chat'),
-                m('input', {type: 'text', id: 'chat-input', onfocus: this.focus, onblur: this.blur }),
-                this.loading ? LoadingIndicator.component({className: 'loading Button-icon'}) : m('span'),
-                m('div', {className: 'wrapper'})
-            ])
+            ]),
+            m('input', {type: 'text', id: 'chat-input', onfocus: this.focus.bind(this), onblur: this.blur.bind(this) }),
+            this.loading ? LoadingIndicator.component({className: 'loading Button-icon'}) : m('span'),
+            m('div', {className: 'wrapper'})
         ]);
     }
 
