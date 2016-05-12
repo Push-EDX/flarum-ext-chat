@@ -145,13 +145,13 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
 });;
 'use strict';
 
-System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/components/IndexPage', 'pushedx/realtime-chat/components/ChatFrame'], function (_export, _context) {
-    var extend, IndexPage, ChatFrame;
+System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/components/HeaderPrimary', 'pushedx/realtime-chat/components/ChatFrame'], function (_export, _context) {
+    var extend, HeaderPrimary, ChatFrame;
     return {
         setters: [function (_flarumExtend) {
             extend = _flarumExtend.extend;
-        }, function (_flarumComponentsIndexPage) {
-            IndexPage = _flarumComponentsIndexPage.default;
+        }, function (_flarumComponentsHeaderPrimary) {
+            HeaderPrimary = _flarumComponentsHeaderPrimary.default;
         }, function (_pushedxRealtimeChatComponentsChatFrame) {
             ChatFrame = _pushedxRealtimeChatComponentsChatFrame.default;
         }],
@@ -161,7 +161,7 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                 /**
                  * Add the upload button to the post composer.
                  */
-                extend(IndexPage.prototype, 'viewItems', function (items) {
+                extend(HeaderPrimary.prototype, 'items', function (items) {
                     var chatFrame = new ChatFrame();
                     items.add('pushedx-chat-frame', chatFrame);
                 });
