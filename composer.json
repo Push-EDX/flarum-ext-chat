@@ -27,9 +27,12 @@
         "flarum-extension": {
             "title": "Realtime Chat",
             "icon": {
-                "name": "chat",
-                "backgroundColor": "#000",
-                "color": "#87d37c"
+                "image": "icon.png",
+                "backgroundSize": "75px 75px",
+                "backgroundPosition": "center",
+                "backgroundRepeat": "no-repeat",
+                "backgroundColor": "#244052",
+                "color": "#fff"
             }
         }
     },
