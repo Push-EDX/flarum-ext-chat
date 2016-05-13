@@ -1,7 +1,14 @@
 'use strict';
 
-System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component', 'flarum/helpers/icon', 'flarum/components/LoadingIndicator'], function (_export, _context) {
-    var Component, icon, LoadingIndicator, ChatFrame;
+System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component', 'flarum/helpers/icon', 'flarum/components/LoadingIndicator', 'flarum/helpers/avatar'], function (_export, _context) {
+    var Component, icon, LoadingIndicator, avatar, ChatFrame;
+
+
+    function ChatMessage(user, message) {
+        this.user = user;
+        this.message = message;
+    }
+
     return {
         setters: [function (_flarumComponent) {
             Component = _flarumComponent.default;
@@ -9,6 +16,8 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
             icon = _flarumHelpersIcon.default;
         }, function (_flarumComponentsLoadingIndicator) {
             LoadingIndicator = _flarumComponentsLoadingIndicator.default;
+        }, function (_flarumHelpersAvatar) {
+            avatar = _flarumHelpersAvatar.default;
         }],
         execute: function () {
             ChatFrame = function (_Component) {
@@ -68,6 +77,20 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         e.target.parentNode.className = "frame";
                     }
                 }, {
+                    key: 'scroll',
+                    value: function scroll(e) {
+                        if (this.status.autoScroll) {
+                            e.scrollTop = e.scrollHeight;
+                        }
+
+                        this.status.autoScroll = e.scrollTop + e.offsetHeight == e.scrollHeight;
+                    }
+                }, {
+                    key: 'disableAutoScroll',
+                    value: function disableAutoScroll(e) {
+                        this.status.autoScroll = e.scrollTop + e.offsetHeight == e.scrollHeight;
+                    }
+                }, {
                     key: 'view',
                     value: function view() {
                         return m('div', { className: 'chat left container' }, [m('div', { className: 'frame', id: 'chat', onmousedown: this.checkFocus.bind(this), onclick: this.setFocus.bind(this) }, [m('div', { id: 'chat-header' }, [m('h2', 'PushEdx Chat')]), m('input', {
@@ -76,14 +99,18 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             onfocus: this.focus.bind(this),
                             onblur: this.blur.bind(this),
                             onkeyup: this.process.bind(this)
-                        }), this.status.loading ? LoadingIndicator.component({ className: 'loading Button-icon' }) : m('span'), m('div', { className: 'wrapper' })])]);
+                        }), this.status.loading ? LoadingIndicator.component({ className: 'loading Button-icon' }) : m('span'), m('div', { className: 'wrapper', config: this.scroll.bind(this), onscroll: this.disableAutoScroll.bind(this) }, [this.status.messages.map(function (o) {
+                            return m('div', { className: 'message-wrapper' }, [m('span', { className: 'avatar-wrapper' }, avatar(o.user, { className: 'avatar' })), m('span', { className: 'message' }, o.message), m('div', { className: 'clear' })]);
+                        })])])]);
                     }
                 }, {
                     key: 'process',
                     value: function process(e) {
                         if (e.keyCode == 13 && !this.status.loading) {
+                            var data = new FormData();
+                            data.append('msg', e.target.value);
+
                             this.status.loading = true;
-                            var msg = e.target.value;
                             e.target.value = '';
                             m.redraw();
 
@@ -93,7 +120,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                                 serialize: function serialize(raw) {
                                     return raw;
                                 },
-                                msg: msg
+                                data: data
                             }).then(this.success.bind(this), this.failure.bind(this));
                         }
                     }
@@ -101,29 +128,17 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                     key: 'failure',
                     value: function failure(message) {
                         // todo show popup
-                        console.log(message);
+                        console.log("FAIL: " + message);
+                        this.status.loading = false;
+                        m.redraw();
                     }
                 }, {
                     key: 'success',
-                    value: function success(message) {
-                        console.log(message);
-                        /*
-                        var link = image.data.attributes.url;
-                          // create a markdown string that holds the image link
-                        var markdownString = '\n![image ' + link + '](' + link + ')\n';
-                          // place the Markdown image link in the Composer
-                        this.textAreaObj.insertAtCursor(markdownString);
-                          // if we are not starting a new discussion, the variable is defined
-                        if (typeof this.textAreaObj.props.preview !== 'undefined') {
-                            // show what we just uploaded
-                            this.textAreaObj.props.preview();
-                        }
-                          // reset the button for a new upload
-                        setTimeout(() => {
-                            document.getElementById("flagrow-image-upload-form").reset();
-                            this.loading = false;
-                        }, 1000);
-                        */
+                    value: function success(response) {
+                        var msg = response.data.id;
+                        this.status.messages.push(new ChatMessage(app.session.user, msg));
+                        this.status.loading = false;
+                        m.redraw();
                     }
                 }]);
                 return ChatFrame;
@@ -151,7 +166,9 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
 
                 var status = {
                     loading: false,
-                    pusher: null
+                    autoScroll: true,
+                    pusher: null,
+                    messages: []
                 };
 
                 /**

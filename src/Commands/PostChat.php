@@ -21,7 +21,7 @@ class PostChat
      *
      * @var string
      */
-    public $post;
+    public $msg;
 
     /**
      * The user performing the action.
@@ -35,9 +35,9 @@ class PostChat
      * @param UploadedFileInterface|string $file   The avatar file to upload.
      * @param User                         $actor  The user performing the action.
      */
-    public function __construct(string $post, User $actor)
+    public function __construct(/*\string*/ $msg, User $actor)
     {
-        $this->$post = $post;
+        $this->msg = $msg;
         $this->actor = $actor;
     }
 }

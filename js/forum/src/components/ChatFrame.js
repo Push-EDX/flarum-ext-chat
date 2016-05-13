@@ -1,6 +1,12 @@
 import Component from 'flarum/Component';
 import icon from 'flarum/helpers/icon';
 import LoadingIndicator from 'flarum/components/LoadingIndicator';
+import avatar from 'flarum/helpers/avatar';
+
+function ChatMessage(user, message) {
+    this.user = user;
+    this.message = message;
+}
 
 export default class ChatFrame extends Component {
 
@@ -65,6 +71,18 @@ export default class ChatFrame extends Component {
         e.target.parentNode.className = "frame";
     }
 
+    scroll(e) {
+        if (this.status.autoScroll) {
+            e.scrollTop = e.scrollHeight;
+        }
+
+        this.status.autoScroll = (e.scrollTop + e.offsetHeight == e.scrollHeight);
+    }
+
+    disableAutoScroll(e) {
+        this.status.autoScroll = (e.scrollTop + e.offsetHeight == e.scrollHeight);
+    }
+
     /**
      * Show the actual Chat Frame.
      *
@@ -84,7 +102,15 @@ export default class ChatFrame extends Component {
                     onkeyup: this.process.bind(this)
                 }),
                 this.status.loading ? LoadingIndicator.component({className: 'loading Button-icon'}) : m('span'),
-                m('div', {className: 'wrapper'})
+                m('div', {className: 'wrapper', config: this.scroll.bind(this), onscroll: this.disableAutoScroll.bind(this) }, [
+                    this.status.messages.map(function(o) {
+                        return m('div', {className: 'message-wrapper'}, [
+                            m('span', {className: 'avatar-wrapper'}, avatar(o.user, {className: 'avatar'})),
+                            m('span', {className: 'message'}, o.message),
+                            m('div', {className: 'clear'})
+                        ])
+                    })
+                ])
             ])
         ]);
     }
@@ -96,8 +122,10 @@ export default class ChatFrame extends Component {
      */
     process(e) {
         if (e.keyCode == 13 && !this.status.loading) {
+            const data = new FormData();
+            data.append('msg', e.target.value);
+
             this.status.loading = true;
-            let msg = e.target.value;
             e.target.value = '';
             m.redraw();
 
@@ -105,7 +133,7 @@ export default class ChatFrame extends Component {
                 method: 'POST',
                 url: app.forum.attribute('apiUrl') + '/chat/post',
                 serialize: raw => raw,
-                msg
+                data
             }).then(
                 this.success.bind(this),
                 this.failure.bind(this)
@@ -120,7 +148,9 @@ export default class ChatFrame extends Component {
      */
     failure(message) {
         // todo show popup
-        console.log(message);
+        console.log("FAIL: " + message);
+        this.status.loading = false;
+        m.redraw();
     }
 
     /**
@@ -128,28 +158,10 @@ export default class ChatFrame extends Component {
      *
      * @param image
      */
-    success(message) {
-        console.log(message);
-        /*
-        var link = image.data.attributes.url;
-
-        // create a markdown string that holds the image link
-        var markdownString = '\n![image ' + link + '](' + link + ')\n';
-
-        // place the Markdown image link in the Composer
-        this.textAreaObj.insertAtCursor(markdownString);
-
-        // if we are not starting a new discussion, the variable is defined
-        if (typeof this.textAreaObj.props.preview !== 'undefined') {
-            // show what we just uploaded
-            this.textAreaObj.props.preview();
-        }
-
-        // reset the button for a new upload
-        setTimeout(() => {
-            document.getElementById("flagrow-image-upload-form").reset();
-            this.loading = false;
-        }, 1000);
-        */
+    success(response) {
+        let msg = response.data.id;
+        this.status.messages.push(new ChatMessage(app.session.user, msg));
+        this.status.loading = false;
+        m.redraw();
     }
 }

@@ -44,7 +44,8 @@
         }
 
         .loading {
-            top: 395px;
+            position: absolute;
+            top: 425px;
             float: left;
             left: 20px;
         }
@@ -52,7 +53,41 @@
         .wrapper {
             overflow: auto;
             height: 380px;
-            padding-left: 15px;
+
+            .message-wrapper {
+                padding-left: 15px;
+                padding-top: 2.5px;
+                padding-bottom: 2.5px;
+
+                .avatar-wrapper {
+                    display:table-cell;
+                    padding-right: 5px;
+                    vertical-align: middle;
+
+                    .avatar {
+                        width: 26px;
+                        height: 26px;
+                        border-radius: 26px;
+                        font-size: 13px;
+                        line-height: 26px;
+                    }
+                }
+
+                .message {
+                    display:table-cell;
+                    padding-top: 3px;
+                    word-break: break-all;
+                    padding-right: 15px;
+                }
+
+                .clear {
+                    clear: both;
+                }
+            }
+
+            .message-wrapper:nth-child(odd) {
+                background-color: #f3f6f9;
+            }
         }
     }
 

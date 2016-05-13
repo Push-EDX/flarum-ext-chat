@@ -51,11 +51,11 @@ class ChatController extends AbstractResourceController
      */
     protected function data(ServerRequestInterface $request, Document $document)
     {
-        $post = array_get($request->getQueryParams(), 'post');
+        $msg = array_get($request->getParsedBody(), 'msg');
         $actor = $request->getAttribute('actor');
 
         return $this->bus->dispatch(
-            new PostChat($post, $actor)
+            new PostChat($msg, $actor)
         );
     }
 }
