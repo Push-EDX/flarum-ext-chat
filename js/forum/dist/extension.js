@@ -2,13 +2,6 @@
 
 System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component', 'flarum/helpers/icon', 'flarum/components/LoadingIndicator', 'flarum/helpers/avatar'], function (_export, _context) {
     var Component, icon, LoadingIndicator, avatar, ChatFrame;
-
-
-    function ChatMessage(user, message) {
-        this.user = user;
-        this.message = message;
-    }
-
     return {
         setters: [function (_flarumComponent) {
             Component = _flarumComponent.default;
@@ -20,7 +13,14 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
             avatar = _flarumHelpersAvatar.default;
         }],
         execute: function () {
-            ChatFrame = function (_Component) {
+            function ChatMessage(user, message) {
+                this.user = user;
+                this.message = message;
+            }
+
+            _export('ChatMessage', ChatMessage);
+
+            _export('ChatFrame', ChatFrame = function (_Component) {
                 babelHelpers.inherits(ChatFrame, _Component);
 
                 function ChatFrame() {
@@ -140,30 +140,56 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 }, {
                     key: 'success',
                     value: function success(response) {
+                        // Add to the status messages
                         var msg = response.data.id;
-                        this.status.messages.push(new ChatMessage(app.session.user, msg));
+                        // Do note "messages" is a "set", thus = is a function
+                        this.status.messages = new ChatMessage(app.session.user, msg);
+                        // End loading
                         this.status.loading = false;
+
+                        // Local storage can not save the complete use as JSON, so let's just
+                        // save its "id", which we will load afterwards
+                        var smallItem = new ChatMessage(app.session.user.id(), msg);
+
+                        // Get the saved array so far
+                        messages = localStorage.getItem('messages');
+                        if (messages === null) {
+                            // First item, add it as is
+                            localStorage.setItem('messages', JSON.stringify([smallItem]));
+                        } else {
+                            // Get all items
+                            messages = JSON.parse(messages);
+                            // Only save the last 9
+                            messages = messages.splice(-9);
+                            // Add the current
+                            messages.push(smallItem);
+                            // Save now
+                            localStorage.setItem('messages', JSON.stringify(messages));
+                        }
+
+                        // Redraw now
                         m.redraw();
                     }
                 }]);
                 return ChatFrame;
-            }(Component);
+            }(Component));
 
-            _export('default', ChatFrame);
+            _export('ChatFrame', ChatFrame);
         }
     };
 });;
 'use strict';
 
 System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/components/HeaderSecondary', 'pushedx/realtime-chat/components/ChatFrame'], function (_export, _context) {
-    var extend, HeaderSecondary, ChatFrame;
+    var extend, HeaderSecondary, ChatFrame, ChatMessage;
     return {
         setters: [function (_flarumExtend) {
             extend = _flarumExtend.extend;
         }, function (_flarumComponentsHeaderSecondary) {
             HeaderSecondary = _flarumComponentsHeaderSecondary.default;
         }, function (_pushedxRealtimeChatComponentsChatFrame) {
-            ChatFrame = _pushedxRealtimeChatComponentsChatFrame.default;
+            ChatFrame = _pushedxRealtimeChatComponentsChatFrame.ChatFrame;
+            ChatMessage = _pushedxRealtimeChatComponentsChatFrame.ChatMessage;
         }],
         execute: function () {
 
@@ -174,7 +200,28 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                     autoScroll: true,
                     oldScroll: 0,
                     pusher: null,
-                    messages: []
+
+                    _init: false,
+                    _messages: [],
+
+                    // Getter because app.store.getById returns null if executed now... Why??
+                    get messages() {
+                        if (!this._init) {
+                            this._messages = (JSON.parse(localStorage.getItem('messages')) || []).map(function (message) {
+                                if (message.user.data) return message;
+
+                                return new ChatMessage(app.store.getById('users', message.user), message.message);
+                            });
+
+                            this._init = true;
+                        }
+
+                        return this._messages;
+                    },
+
+                    set messages(message) {
+                        this._messages.push(message);
+                    }
                 };
 
                 /**

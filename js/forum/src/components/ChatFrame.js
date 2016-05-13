@@ -3,12 +3,12 @@ import icon from 'flarum/helpers/icon';
 import LoadingIndicator from 'flarum/components/LoadingIndicator';
 import avatar from 'flarum/helpers/avatar';
 
-function ChatMessage(user, message) {
+export function ChatMessage(user, message) {
     this.user = user;
     this.message = message;
 }
 
-export default class ChatFrame extends Component {
+export class ChatFrame extends Component {
 
     /**
      * Load the configured remote uploader service.
@@ -164,9 +164,34 @@ export default class ChatFrame extends Component {
      * @param image
      */
     success(response) {
+        // Add to the status messages
         let msg = response.data.id;
-        this.status.messages.push(new ChatMessage(app.session.user, msg));
+        // Do note "messages" is a "set", thus = is a function
+        this.status.messages = new ChatMessage(app.session.user, msg);
+        // End loading
         this.status.loading = false;
+
+        // Local storage can not save the complete use as JSON, so let's just
+        // save its "id", which we will load afterwards
+        let smallItem = new ChatMessage(app.session.user.id(), msg);
+
+        // Get the saved array so far
+        messages = localStorage.getItem('messages');
+        if (messages === null) {
+            // First item, add it as is
+            localStorage.setItem('messages', JSON.stringify([smallItem]));
+        } else {
+            // Get all items
+            messages = JSON.parse(messages);
+            // Only save the last 9
+            messages = messages.splice(-9);
+            // Add the current
+            messages.push(smallItem)
+            // Save now
+            localStorage.setItem('messages', JSON.stringify(messages));
+        }
+
+        // Redraw now
         m.redraw();
     }
 }
