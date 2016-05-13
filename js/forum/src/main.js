@@ -8,6 +8,7 @@ app.initializers.add('pushedx-realtime-chat', app => {
     let status = {
         loading: false,
         autoScroll: true,
+        oldScroll: 0,
         pusher: null,
         messages: [],
     };

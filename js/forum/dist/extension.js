@@ -81,14 +81,19 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                     value: function scroll(e) {
                         if (this.status.autoScroll) {
                             e.scrollTop = e.scrollHeight;
+                        } else {
+                            e.scrollTop = this.status.oldScroll;
                         }
 
                         this.status.autoScroll = e.scrollTop + e.offsetHeight == e.scrollHeight;
+                        this.status.oldScroll = e.scrollTop;
                     }
                 }, {
                     key: 'disableAutoScroll',
                     value: function disableAutoScroll(e) {
-                        this.status.autoScroll = e.scrollTop + e.offsetHeight == e.scrollHeight;
+                        e = e.target;
+                        this.status.autoScroll = false;
+                        this.status.oldScroll = e.scrollTop;
                     }
                 }, {
                     key: 'view',
@@ -167,6 +172,7 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                 var status = {
                     loading: false,
                     autoScroll: true,
+                    oldScroll: 0,
                     pusher: null,
                     messages: []
                 };

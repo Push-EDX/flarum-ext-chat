@@ -74,13 +74,18 @@ export default class ChatFrame extends Component {
     scroll(e) {
         if (this.status.autoScroll) {
             e.scrollTop = e.scrollHeight;
+        } else {
+            e.scrollTop = this.status.oldScroll;
         }
 
         this.status.autoScroll = (e.scrollTop + e.offsetHeight == e.scrollHeight);
+        this.status.oldScroll = e.scrollTop;
     }
 
     disableAutoScroll(e) {
-        this.status.autoScroll = (e.scrollTop + e.offsetHeight == e.scrollHeight);
+        e = e.target;
+        this.status.autoScroll = false;
+        this.status.oldScroll = e.scrollTop;
     }
 
     /**
