@@ -1,7 +1,7 @@
 {
-    "name": "Push-EDX/flarum-ext-chat",
+    "name": "push-edx/flarum-ext-chat",
     "description": "Realtime chat.",
-    "keywords": ["chat", "flarum", "pushedx", "Push-EDX"],
+    "keywords": ["chat", "flarum", "pushedx", "push-edx"],
     "type": "flarum-extension",
     "license": "MIT",
     "authors": [
