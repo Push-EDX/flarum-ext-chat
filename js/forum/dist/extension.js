@@ -22,8 +22,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 babelHelpers.createClass(ChatFrame, [{
                     key: 'init',
                     value: function init() {
-                        // initial state of the button
-                        this.loading = false;
+                        this.status = null;
                     }
                 }, {
                     key: 'getChat',
@@ -71,52 +70,43 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 }, {
                     key: 'view',
                     value: function view() {
-                        return m('div', { className: 'chat left container' }, [m('div', { className: 'frame', id: 'chat', onmousedown: this.checkFocus.bind(this), onclick: this.setFocus.bind(this) }, [m('div', { id: 'chat-header' }, [m('h2', 'PushEdx Chat')]), m('input', { type: 'text', id: 'chat-input', onfocus: this.focus.bind(this), onblur: this.blur.bind(this) }), this.loading ? LoadingIndicator.component({ className: 'loading Button-icon' }) : m('span'), m('div', { className: 'wrapper' })])]);
+                        return m('div', { className: 'chat left container' }, [m('div', { className: 'frame', id: 'chat', onmousedown: this.checkFocus.bind(this), onclick: this.setFocus.bind(this) }, [m('div', { id: 'chat-header' }, [m('h2', 'PushEdx Chat')]), m('input', {
+                            type: 'text',
+                            id: 'chat-input',
+                            onfocus: this.focus.bind(this),
+                            onblur: this.blur.bind(this),
+                            onkeyup: this.process.bind(this)
+                        }), this.status.loading ? LoadingIndicator.component({ className: 'loading Button-icon' }) : m('span'), m('div', { className: 'wrapper' })])]);
                     }
                 }, {
                     key: 'process',
-                    value: function process(e) {}
-                    /*
-                    // get the file from the input field
-                    const data = new FormData();
-                    data.append('image', $(e.target)[0].files[0]);
-                      // set the button in the loading state (and redraw the element!)
-                    this.loading = true;
-                    m.redraw();
-                      // send a POST request to the api
-                    app.request({
-                        method: 'POST',
-                        url: app.forum.attribute('apiUrl') + '/image/upload',
-                        serialize: raw => raw,
-                        data
-                    }).then(
-                        this.success.bind(this),
-                        this.failure.bind(this)
-                    );
-                    */
+                    value: function process(e) {
+                        if (e.keyCode == 13 && !this.status.loading) {
+                            this.status.loading = true;
+                            var msg = e.target.value;
+                            e.target.value = '';
+                            m.redraw();
 
-
-                    /**
-                     * Handles errors.
-                     *
-                     * @param message
-                     */
-
+                            app.request({
+                                method: 'POST',
+                                url: app.forum.attribute('apiUrl') + '/chat/post',
+                                serialize: function serialize(raw) {
+                                    return raw;
+                                },
+                                msg: msg
+                            }).then(this.success.bind(this), this.failure.bind(this));
+                        }
+                    }
                 }, {
                     key: 'failure',
-                    value: function failure(message) {}
-                    // todo show popup
-
-
-                    /**
-                     * Appends the image's link to the body of the composer.
-                     *
-                     * @param image
-                     */
-
+                    value: function failure(message) {
+                        // todo show popup
+                        console.log(message);
+                    }
                 }, {
                     key: 'success',
-                    value: function success(image) {
+                    value: function success(message) {
+                        console.log(message);
                         /*
                         var link = image.data.attributes.url;
                           // create a markdown string that holds the image link
@@ -145,24 +135,31 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
 });;
 'use strict';
 
-System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/components/HeaderPrimary', 'pushedx/realtime-chat/components/ChatFrame'], function (_export, _context) {
-    var extend, HeaderPrimary, ChatFrame;
+System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/components/HeaderSecondary', 'pushedx/realtime-chat/components/ChatFrame'], function (_export, _context) {
+    var extend, HeaderSecondary, ChatFrame;
     return {
         setters: [function (_flarumExtend) {
             extend = _flarumExtend.extend;
-        }, function (_flarumComponentsHeaderPrimary) {
-            HeaderPrimary = _flarumComponentsHeaderPrimary.default;
+        }, function (_flarumComponentsHeaderSecondary) {
+            HeaderSecondary = _flarumComponentsHeaderSecondary.default;
         }, function (_pushedxRealtimeChatComponentsChatFrame) {
             ChatFrame = _pushedxRealtimeChatComponentsChatFrame.default;
         }],
         execute: function () {
 
             app.initializers.add('pushedx-realtime-chat', function (app) {
+
+                var status = {
+                    loading: false,
+                    pusher: null
+                };
+
                 /**
                  * Add the upload button to the post composer.
                  */
-                extend(HeaderPrimary.prototype, 'items', function (items) {
+                extend(HeaderSecondary.prototype, 'items', function (items) {
                     var chatFrame = new ChatFrame();
+                    chatFrame.status = status;
                     items.add('pushedx-chat-frame', chatFrame);
                 });
             });

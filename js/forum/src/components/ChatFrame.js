@@ -8,8 +8,7 @@ export default class ChatFrame extends Component {
      * Load the configured remote uploader service.
      */
     init() {
-        // initial state of the button
-        this.loading = false;
+        this.status = null;
     }
 
     /**
@@ -77,8 +76,14 @@ export default class ChatFrame extends Component {
                 m('div', {id: 'chat-header'}, [
                     m('h2', 'PushEdx Chat'),
                 ]),
-                m('input', {type: 'text', id: 'chat-input', onfocus: this.focus.bind(this), onblur: this.blur.bind(this) }),
-                this.loading ? LoadingIndicator.component({className: 'loading Button-icon'}) : m('span'),
+                m('input', {
+                    type: 'text',
+                    id: 'chat-input',
+                    onfocus: this.focus.bind(this),
+                    onblur: this.blur.bind(this),
+                    onkeyup: this.process.bind(this)
+                }),
+                this.status.loading ? LoadingIndicator.component({className: 'loading Button-icon'}) : m('span'),
                 m('div', {className: 'wrapper'})
             ])
         ]);
@@ -90,26 +95,22 @@ export default class ChatFrame extends Component {
      * @param e
      */
     process(e) {
-        /*
-        // get the file from the input field
-        const data = new FormData();
-        data.append('image', $(e.target)[0].files[0]);
+        if (e.keyCode == 13 && !this.status.loading) {
+            this.status.loading = true;
+            let msg = e.target.value;
+            e.target.value = '';
+            m.redraw();
 
-        // set the button in the loading state (and redraw the element!)
-        this.loading = true;
-        m.redraw();
-
-        // send a POST request to the api
-        app.request({
-            method: 'POST',
-            url: app.forum.attribute('apiUrl') + '/image/upload',
-            serialize: raw => raw,
-            data
-        }).then(
-            this.success.bind(this),
-            this.failure.bind(this)
-        );
-        */
+            app.request({
+                method: 'POST',
+                url: app.forum.attribute('apiUrl') + '/chat/post',
+                serialize: raw => raw,
+                msg
+            }).then(
+                this.success.bind(this),
+                this.failure.bind(this)
+            );
+        }
     }
 
     /**
@@ -119,6 +120,7 @@ export default class ChatFrame extends Component {
      */
     failure(message) {
         // todo show popup
+        console.log(message);
     }
 
     /**
@@ -126,7 +128,8 @@ export default class ChatFrame extends Component {
      *
      * @param image
      */
-    success(image) {
+    success(message) {
+        console.log(message);
         /*
         var link = image.data.attributes.url;
 

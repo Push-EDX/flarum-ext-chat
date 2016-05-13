@@ -14,7 +14,7 @@ namespace PushEDX\Chat\Commands;
 
 use Flarum\Core\User;
 
-class UploadImage
+class PostChat
 {
     /**
      * The chat message
