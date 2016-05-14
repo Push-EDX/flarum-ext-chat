@@ -45,7 +45,7 @@ app.initializers.add('pushedx-realtime-chat', app => {
                 status.callback(data.message, app.store.getById('users', data.actorId));
             });
 
-            extend(context, 'onunload', () => channels.main.unbind());
+            extend(context, 'onunload', () => channels.main.unbind('newChat'));
         });
     });
 

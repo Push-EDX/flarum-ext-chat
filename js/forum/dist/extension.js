@@ -160,6 +160,9 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 }, {
                     key: 'success',
                     value: function success(response) {
+                        // End loading
+                        this.status.loading = false;
+
                         // Do nothing, pusher will
                         //let msg = response.data.id;
                         //this.addMessage(msg, app.session.user)
@@ -169,8 +172,6 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                     value: function addMessage(msg, user) {
                         // Do note "messages" is a "set", thus = is a function
                         this.status.messages = new ChatMessage(user, msg);
-                        // End loading
-                        this.status.loading = false;
 
                         // Local storage can not save the complete use as JSON, so let's just
                         // save its "id", which we will load afterwards
@@ -259,7 +260,7 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                         });
 
                         extend(context, 'onunload', function () {
-                            return channels.main.unbind();
+                            return channels.main.unbind('newChat');
                         });
                     });
                 });

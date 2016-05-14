@@ -183,6 +183,9 @@ export class ChatFrame extends Component {
      * @param image
      */
     success(response) {
+        // End loading
+        this.status.loading = false;
+
         // Do nothing, pusher will
         //let msg = response.data.id;
         //this.addMessage(msg, app.session.user)
@@ -191,8 +194,6 @@ export class ChatFrame extends Component {
     addMessage(msg, user) {
         // Do note "messages" is a "set", thus = is a function
         this.status.messages = new ChatMessage(user, msg);
-        // End loading
-        this.status.loading = false;
 
         // Local storage can not save the complete use as JSON, so let's just
         // save its "id", which we will load afterwards
