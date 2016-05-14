@@ -186,6 +186,9 @@ export class ChatFrame extends Component {
         // End loading
         this.status.loading = false;
 
+        // Redraw now
+        m.redraw();
+
         // Do nothing, pusher will
         //let msg = response.data.id;
         //this.addMessage(msg, app.session.user)
@@ -214,6 +217,9 @@ export class ChatFrame extends Component {
             // Save now
             localStorage.setItem('messages', JSON.stringify(messages));
         }
+
+        // End loading
+        this.status.loading = false;
 
         // Redraw now
         m.redraw();
