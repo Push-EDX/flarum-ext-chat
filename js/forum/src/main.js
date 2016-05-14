@@ -10,6 +10,7 @@ app.initializers.add('pushedx-realtime-chat', app => {
         autoScroll: true,
         oldScroll: 0,
         pusher: null,
+        beingShown: JSON.parse(localStorage.getItem('beingShown')) || false,
 
         _init: false,
         _messages: [],

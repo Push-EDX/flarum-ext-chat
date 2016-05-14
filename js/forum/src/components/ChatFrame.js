@@ -83,9 +83,25 @@ export class ChatFrame extends Component {
     }
 
     disableAutoScroll(e) {
-        e = e.target;
+        let el = e.target;
         this.status.autoScroll = false;
-        this.status.oldScroll = e.scrollTop;
+        this.status.oldScroll = el.scrollTop;
+    }
+
+    toggle(e) {
+        var chat = this.getChat(e.target).parentNode;
+        var classes = chat.className;
+        var showing = false;
+
+        if (classes.indexOf(' hidden') >= 0) {
+            classes = classes.substr(0, classes.indexOf(' hidden'));
+            showing = true;
+        } else {
+            classes += ' hidden';
+        }
+
+        chat.className = classes;
+        localStorage.setItem('beingShown', JSON.stringify(showing));
     }
 
     /**
@@ -94,20 +110,11 @@ export class ChatFrame extends Component {
      * @returns {*}
      */
     view() {
-        return m('div', {className: 'chat left container'}, [
+        return m('div', {className: 'chat left container ' + (this.status.beingShown ? '' : 'hidden')}, [
             m('div', {className: 'frame', id: 'chat', onmousedown: this.checkFocus.bind(this), onclick: this.setFocus.bind(this) }, [
-                m('div', {id: 'chat-header'}, [
+                m('div', {id: 'chat-header', onclick: this.toggle.bind(this)}, [
                     m('h2', 'PushEdx Chat'),
                 ]),
-                m('input', {
-                    type: 'text',
-                    id: 'chat-input',
-                    disabled: !app.forum.attribute('canPostChat'),
-                    placeholder: app.forum.attribute('canPostChat') ? '' : 'Solo los usuarios registrados pueden usar el chat',
-                    onfocus: this.focus.bind(this),
-                    onblur: this.blur.bind(this),
-                    onkeyup: this.process.bind(this)
-                }),
                 this.status.loading ? LoadingIndicator.component({className: 'loading Button-icon'}) : m('span'),
                 m('div', {className: 'wrapper', config: this.scroll.bind(this), onscroll: this.disableAutoScroll.bind(this) }, [
                     this.status.messages.map(function(o) {
@@ -117,7 +124,16 @@ export class ChatFrame extends Component {
                             m('div', {className: 'clear'})
                         ])
                     })
-                ])
+                ]),
+                m('input', {
+                    type: 'text',
+                    id: 'chat-input',
+                    disabled: !app.forum.attribute('canPostChat'),
+                    placeholder: app.forum.attribute('canPostChat') ? '' : 'Solo los usuarios registrados pueden usar el chat',
+                    onfocus: this.focus.bind(this),
+                    onblur: this.blur.bind(this),
+                    onkeyup: this.process.bind(this)
+                })
             ])
         ]);
     }

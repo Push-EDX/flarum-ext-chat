@@ -91,14 +91,33 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 }, {
                     key: 'disableAutoScroll',
                     value: function disableAutoScroll(e) {
-                        e = e.target;
+                        var el = e.target;
                         this.status.autoScroll = false;
-                        this.status.oldScroll = e.scrollTop;
+                        this.status.oldScroll = el.scrollTop;
+                    }
+                }, {
+                    key: 'toggle',
+                    value: function toggle(e) {
+                        var chat = this.getChat(e.target).parentNode;
+                        var classes = chat.className;
+                        var showing = false;
+
+                        if (classes.indexOf(' hidden') >= 0) {
+                            classes = classes.substr(0, classes.indexOf(' hidden'));
+                            showing = true;
+                        } else {
+                            classes += ' hidden';
+                        }
+
+                        chat.className = classes;
+                        localStorage.setItem('beingShown', JSON.stringify(showing));
                     }
                 }, {
                     key: 'view',
                     value: function view() {
-                        return m('div', { className: 'chat left container' }, [m('div', { className: 'frame', id: 'chat', onmousedown: this.checkFocus.bind(this), onclick: this.setFocus.bind(this) }, [m('div', { id: 'chat-header' }, [m('h2', 'PushEdx Chat')]), m('input', {
+                        return m('div', { className: 'chat left container ' + (this.status.beingShown ? '' : 'hidden') }, [m('div', { className: 'frame', id: 'chat', onmousedown: this.checkFocus.bind(this), onclick: this.setFocus.bind(this) }, [m('div', { id: 'chat-header', onclick: this.toggle.bind(this) }, [m('h2', 'PushEdx Chat')]), this.status.loading ? LoadingIndicator.component({ className: 'loading Button-icon' }) : m('span'), m('div', { className: 'wrapper', config: this.scroll.bind(this), onscroll: this.disableAutoScroll.bind(this) }, [this.status.messages.map(function (o) {
+                            return m('div', { className: 'message-wrapper' }, [m('span', { className: 'avatar-wrapper' }, avatar(o.user, { className: 'avatar' })), m('span', { className: 'message' }, o.message), m('div', { className: 'clear' })]);
+                        })]), m('input', {
                             type: 'text',
                             id: 'chat-input',
                             disabled: !app.forum.attribute('canPostChat'),
@@ -106,9 +125,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             onfocus: this.focus.bind(this),
                             onblur: this.blur.bind(this),
                             onkeyup: this.process.bind(this)
-                        }), this.status.loading ? LoadingIndicator.component({ className: 'loading Button-icon' }) : m('span'), m('div', { className: 'wrapper', config: this.scroll.bind(this), onscroll: this.disableAutoScroll.bind(this) }, [this.status.messages.map(function (o) {
-                            return m('div', { className: 'message-wrapper' }, [m('span', { className: 'avatar-wrapper' }, avatar(o.user, { className: 'avatar' })), m('span', { className: 'message' }, o.message), m('div', { className: 'clear' })]);
-                        })])])]);
+                        })])]);
                     }
                 }, {
                     key: 'process',
@@ -202,6 +219,7 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                     autoScroll: true,
                     oldScroll: 0,
                     pusher: null,
+                    beingShown: JSON.parse(localStorage.getItem('beingShown')) || false,
 
                     _init: false,
                     _messages: [],

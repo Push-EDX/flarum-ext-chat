@@ -11,7 +11,6 @@
         float: right;
         max-width: 100%;
         width: 600px;
-        height: 450px;
         background-color: white;
         border-radius: 4px 4px 0 0;
         box-shadow: 0 2px 6px rgba(0,0,0,0.35);
@@ -21,6 +20,7 @@
             height: 30px;
             background-color: #506B90;
             border-radius: 4px 4px 0 0;
+            cursor: pointer;
 
             h2 {
                 color: #fff;
@@ -33,7 +33,6 @@
 
         #chat-input {
             resize: none;
-            position: absolute;
             width: 100%;
             padding: 5px 10px 5px 10px;
             bottom: 0;
@@ -114,6 +113,17 @@
 
     .frame.active {
         box-shadow: 0 0 0 2px #377F21, 0 2px 6px rgba(0,0,0,0.35);
+    }
+}
+
+.chat.hidden {
+    .frame {
+        #chat-input {
+            display: none;
+        }
+        .wrapper {
+            display: none;
+        }
     }
 }
 
