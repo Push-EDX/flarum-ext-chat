@@ -110,6 +110,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         }
 
                         chat.className = classes;
+                        this.status.beingShown = showing;
                         localStorage.setItem('beingShown', JSON.stringify(showing));
                     }
                 }, {

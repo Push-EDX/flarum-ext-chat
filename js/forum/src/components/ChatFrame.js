@@ -101,6 +101,7 @@ export class ChatFrame extends Component {
         }
 
         chat.className = classes;
+        this.status.beingShown = showing;
         localStorage.setItem('beingShown', JSON.stringify(showing));
     }
 
