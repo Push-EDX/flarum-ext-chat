@@ -101,6 +101,8 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         return m('div', { className: 'chat left container' }, [m('div', { className: 'frame', id: 'chat', onmousedown: this.checkFocus.bind(this), onclick: this.setFocus.bind(this) }, [m('div', { id: 'chat-header' }, [m('h2', 'PushEdx Chat')]), m('input', {
                             type: 'text',
                             id: 'chat-input',
+                            disabled: !app.forum.attribute('canPostChat'),
+                            placeholder: app.forum.attribute('canPostChat') ? '' : 'Solo los usuarios registrados pueden usar el chat',
                             onfocus: this.focus.bind(this),
                             onblur: this.blur.bind(this),
                             onkeyup: this.process.bind(this)

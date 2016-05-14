@@ -102,6 +102,8 @@ export class ChatFrame extends Component {
                 m('input', {
                     type: 'text',
                     id: 'chat-input',
+                    disabled: !app.forum.attribute('canPostChat'),
+                    placeholder: app.forum.attribute('canPostChat') ? '' : 'Solo los usuarios registrados pueden usar el chat',
                     onfocus: this.focus.bind(this),
                     onblur: this.blur.bind(this),
                     onkeyup: this.process.bind(this)
