@@ -1,5 +1,5 @@
 import { extend } from 'flarum/extend';
-import HeaderSecondary from 'flarum/components/HeaderSecondary';
+import HeaderPrimary from 'flarum/components/HeaderPrimary';
 
 import {ChatFrame,ChatMessage} from 'pushedx/realtime-chat/components/ChatFrame';
 
@@ -9,7 +9,6 @@ app.initializers.add('pushedx-realtime-chat', app => {
         loading: false,
         autoScroll: true,
         oldScroll: 0,
-        pusher: null,
         beingShown: JSON.parse(localStorage.getItem('beingShown')) || false,
 
         _init: false,
@@ -37,11 +36,20 @@ app.initializers.add('pushedx-realtime-chat', app => {
         }
     };
 
+    extend(HeaderPrimary.prototype, 'config', function(x, isInitialized, context) {
+        app.pusher.then(channels => {
+            channels.main.bind('newChat', data => {
+                console.log(data);
+            });
+
+            extend(context, 'onunload', () => channels.main.unbind());
+        });
+    });
+
     /**
      * Add the upload button to the post composer.
      */
-    extend(HeaderSecondary.prototype, 'items', function(items)
-    {
+    extend(HeaderPrimary.prototype, 'items', function(items) {
         var chatFrame = new ChatFrame;
         chatFrame.status = status;
         items.add('pushedx-chat-frame', chatFrame);

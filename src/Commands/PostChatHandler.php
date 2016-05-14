@@ -29,6 +29,7 @@ use Intervention\Image\ImageManager;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Pusher;
 
 class PostChatHandler
 {
@@ -89,6 +90,25 @@ class PostChatHandler
             'pushedx.chat.post'
         );
 
+        $pusher = $this->getPusher();
+
+        $pusher->trigger('public', 'newChat', [
+            'actorId' => $command->actor->id,
+            'message' => $command->msg
+        ]);
+
         return $command->msg;
+    }
+
+    /**
+     * @return Pusher
+     */
+    protected function getPusher()
+    {
+        return new Pusher(
+            $this->settings->get('flarum-pusher.app_key'),
+            $this->settings->get('flarum-pusher.app_secret'),
+            $this->settings->get('flarum-pusher.app_id')
+        );
     }
 }

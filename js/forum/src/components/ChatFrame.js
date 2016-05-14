@@ -185,14 +185,18 @@ export class ChatFrame extends Component {
     success(response) {
         // Add to the status messages
         let msg = response.data.id;
+        this.addMessage(msg, app.session.user)
+    }
+
+    addMessage(msg, user) {
         // Do note "messages" is a "set", thus = is a function
-        this.status.messages = new ChatMessage(app.session.user, msg);
+        this.status.messages = new ChatMessage(user, msg);
         // End loading
         this.status.loading = false;
 
         // Local storage can not save the complete use as JSON, so let's just
         // save its "id", which we will load afterwards
-        let smallItem = new ChatMessage(app.session.user.id(), msg);
+        let smallItem = new ChatMessage(user.id(), msg);
 
         // Get the saved array so far
         messages = localStorage.getItem('messages');

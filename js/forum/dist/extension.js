@@ -162,14 +162,19 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                     value: function success(response) {
                         // Add to the status messages
                         var msg = response.data.id;
+                        this.addMessage(msg, app.session.user);
+                    }
+                }, {
+                    key: 'addMessage',
+                    value: function addMessage(msg, user) {
                         // Do note "messages" is a "set", thus = is a function
-                        this.status.messages = new ChatMessage(app.session.user, msg);
+                        this.status.messages = new ChatMessage(user, msg);
                         // End loading
                         this.status.loading = false;
 
                         // Local storage can not save the complete use as JSON, so let's just
                         // save its "id", which we will load afterwards
-                        var smallItem = new ChatMessage(app.session.user.id(), msg);
+                        var smallItem = new ChatMessage(user.id(), msg);
 
                         // Get the saved array so far
                         messages = localStorage.getItem('messages');
@@ -200,13 +205,13 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
 });;
 'use strict';
 
-System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/components/HeaderSecondary', 'pushedx/realtime-chat/components/ChatFrame'], function (_export, _context) {
-    var extend, HeaderSecondary, ChatFrame, ChatMessage;
+System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/components/HeaderPrimary', 'pushedx/realtime-chat/components/ChatFrame'], function (_export, _context) {
+    var extend, HeaderPrimary, ChatFrame, ChatMessage;
     return {
         setters: [function (_flarumExtend) {
             extend = _flarumExtend.extend;
-        }, function (_flarumComponentsHeaderSecondary) {
-            HeaderSecondary = _flarumComponentsHeaderSecondary.default;
+        }, function (_flarumComponentsHeaderPrimary) {
+            HeaderPrimary = _flarumComponentsHeaderPrimary.default;
         }, function (_pushedxRealtimeChatComponentsChatFrame) {
             ChatFrame = _pushedxRealtimeChatComponentsChatFrame.ChatFrame;
             ChatMessage = _pushedxRealtimeChatComponentsChatFrame.ChatMessage;
@@ -219,7 +224,6 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                     loading: false,
                     autoScroll: true,
                     oldScroll: 0,
-                    pusher: null,
                     beingShown: JSON.parse(localStorage.getItem('beingShown')) || false,
 
                     _init: false,
@@ -245,10 +249,22 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                     }
                 };
 
+                extend(HeaderPrimary.prototype, 'config', function (x, isInitialized, context) {
+                    app.pusher.then(function (channels) {
+                        channels.main.bind('newChat', function (data) {
+                            console.log(data);
+                        });
+
+                        extend(context, 'onunload', function () {
+                            return channels.main.unbind();
+                        });
+                    });
+                });
+
                 /**
                  * Add the upload button to the post composer.
                  */
-                extend(HeaderSecondary.prototype, 'items', function (items) {
+                extend(HeaderPrimary.prototype, 'items', function (items) {
                     var chatFrame = new ChatFrame();
                     chatFrame.status = status;
                     items.add('pushedx-chat-frame', chatFrame);
