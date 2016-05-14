@@ -29,7 +29,7 @@ class AddClientAssets
     {
         $events->listen(ConfigureClientView::class, [$this, 'addForumAssets']);
         $events->listen(ConfigureClientView::class, [$this, 'addAdminAssets']);
-        $events->listen(ConfigureLocales::class, [$this, 'addLocales']);
+        //$events->listen(ConfigureLocales::class, [$this, 'addLocales']);
     }
 
     /**
