@@ -160,9 +160,9 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 }, {
                     key: 'success',
                     value: function success(response) {
-                        // Add to the status messages
-                        var msg = response.data.id;
-                        this.addMessage(msg, app.session.user);
+                        // Do nothing, pusher will
+                        //let msg = response.data.id;
+                        //this.addMessage(msg, app.session.user)
                     }
                 }, {
                     key: 'addMessage',
@@ -224,6 +224,7 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                     loading: false,
                     autoScroll: true,
                     oldScroll: 0,
+                    callback: null,
                     beingShown: JSON.parse(localStorage.getItem('beingShown')) || false,
 
                     _init: false,
@@ -250,9 +251,11 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                 };
 
                 extend(HeaderPrimary.prototype, 'config', function (x, isInitialized, context) {
+                    if (isInitialized) return;
+
                     app.pusher.then(function (channels) {
                         channels.main.bind('newChat', function (data) {
-                            console.log(data);
+                            status.callback(data.message, app.store.getById('users', data.actorId));
                         });
 
                         extend(context, 'onunload', function () {
@@ -267,6 +270,7 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                 extend(HeaderPrimary.prototype, 'items', function (items) {
                     var chatFrame = new ChatFrame();
                     chatFrame.status = status;
+                    status.callback = chatFrame.addMessage;
                     items.add('pushedx-chat-frame', chatFrame);
                 });
             });

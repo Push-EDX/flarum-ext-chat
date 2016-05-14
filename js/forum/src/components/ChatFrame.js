@@ -183,9 +183,9 @@ export class ChatFrame extends Component {
      * @param image
      */
     success(response) {
-        // Add to the status messages
-        let msg = response.data.id;
-        this.addMessage(msg, app.session.user)
+        // Do nothing, pusher will
+        //let msg = response.data.id;
+        //this.addMessage(msg, app.session.user)
     }
 
     addMessage(msg, user) {

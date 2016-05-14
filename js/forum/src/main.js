@@ -9,6 +9,7 @@ app.initializers.add('pushedx-realtime-chat', app => {
         loading: false,
         autoScroll: true,
         oldScroll: 0,
+        callback: null,
         beingShown: JSON.parse(localStorage.getItem('beingShown')) || false,
 
         _init: false,
@@ -37,9 +38,11 @@ app.initializers.add('pushedx-realtime-chat', app => {
     };
 
     extend(HeaderPrimary.prototype, 'config', function(x, isInitialized, context) {
+        if (isInitialized) return;
+
         app.pusher.then(channels => {
             channels.main.bind('newChat', data => {
-                console.log(data);
+                status.callback(data.message, app.store.getById('users', data.actorId));
             });
 
             extend(context, 'onunload', () => channels.main.unbind());
@@ -52,6 +55,7 @@ app.initializers.add('pushedx-realtime-chat', app => {
     extend(HeaderPrimary.prototype, 'items', function(items) {
         var chatFrame = new ChatFrame;
         chatFrame.status = status;
+        status.callback = chatFrame.addMessage;
         items.add('pushedx-chat-frame', chatFrame);
     });
 });
