@@ -23,7 +23,17 @@ app.initializers.add('pushedx-realtime-chat', app => {
                         if (message.user.data)
                             return message;
 
-                        return new ChatMessage(app.store.getById('users', message.user), message.message);
+                        var user = app.store.getById('users', message.user);
+                        var obj = new ChatMessage(user, message.message);
+
+                        if (user == undefined)
+                        {
+                            app.store.find('users', message.user).then(function(user){
+                                obj.user = user;
+                            });
+                        }
+
+                        return obj;
                     });
 
                 this._init = true;
@@ -42,7 +52,17 @@ app.initializers.add('pushedx-realtime-chat', app => {
 
         app.pusher.then(channels => {
             channels.main.bind('newChat', data => {
-                status.callback(data.message, app.store.getById('users', data.actorId));
+                var user = app.store.getById('users', data.actorId);
+                if (user != undefined)
+                {
+                    status.callback(data.message, user);
+                }
+                else
+                {
+                    app.store.find('users', data.actorId).then(function(user){
+                        status.callback(data.message, user);
+                    });
+                }
             });
 
             extend(context, 'onunload', () => channels.main.unbind('newChat'));
