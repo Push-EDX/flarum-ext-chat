@@ -172,13 +172,14 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                     }
                 }, {
                     key: 'addMessage',
-                    value: function addMessage(msg, user) {
+                    value: function addMessage(msg, user, userId) {
                         // Do note "messages" is a "set", thus = is a function
-                        this.status.messages = new ChatMessage(user, msg);
+                        var obj = new ChatMessage(user, msg);
+                        this.status.messages = obj;
 
                         // Local storage can not save the complete use as JSON, so let's just
                         // save its "id", which we will load afterwards
-                        var smallItem = new ChatMessage(user.id(), msg);
+                        var smallItem = new ChatMessage(userId, msg);
 
                         // Get the saved array so far
                         messages = localStorage.getItem('messages');
@@ -201,6 +202,9 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
 
                         // Redraw now
                         m.redraw();
+
+                        // Return the object
+                        return obj;
                     }
                 }]);
                 return ChatFrame;
@@ -249,6 +253,7 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                                 if (user == undefined) {
                                     app.store.find('users', message.user).then(function (user) {
                                         obj.user = user;
+                                        m.redraw();
                                     });
                                 }
 
@@ -272,11 +277,12 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                     app.pusher.then(function (channels) {
                         channels.main.bind('newChat', function (data) {
                             var user = app.store.getById('users', data.actorId);
-                            if (user != undefined) {
-                                status.callback(data.message, user);
-                            } else {
+                            var obj = status.callback(data.message, user, data.actorId);
+
+                            if (user == undefined) {
                                 app.store.find('users', data.actorId).then(function (user) {
-                                    status.callback(data.message, user);
+                                    obj.user = user;
+                                    m.redraw();
                                 });
                             }
                         });

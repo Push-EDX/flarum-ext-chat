@@ -30,6 +30,7 @@ app.initializers.add('pushedx-realtime-chat', app => {
                         {
                             app.store.find('users', message.user).then(function(user){
                                 obj.user = user;
+                                m.redraw();
                             });
                         }
 
@@ -53,14 +54,13 @@ app.initializers.add('pushedx-realtime-chat', app => {
         app.pusher.then(channels => {
             channels.main.bind('newChat', data => {
                 var user = app.store.getById('users', data.actorId);
-                if (user != undefined)
-                {
-                    status.callback(data.message, user);
-                }
-                else
+                var obj = status.callback(data.message, user, data.actorId);
+
+                if (user == undefined)
                 {
                     app.store.find('users', data.actorId).then(function(user){
-                        status.callback(data.message, user);
+                        obj.user = user;
+                        m.redraw();
                     });
                 }
             });

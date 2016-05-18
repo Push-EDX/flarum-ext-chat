@@ -194,13 +194,14 @@ export class ChatFrame extends Component {
         //this.addMessage(msg, app.session.user)
     }
 
-    addMessage(msg, user) {
+    addMessage(msg, user, userId) {
         // Do note "messages" is a "set", thus = is a function
-        this.status.messages = new ChatMessage(user, msg);
+        var obj = new ChatMessage(user, msg);
+        this.status.messages = obj;
 
         // Local storage can not save the complete use as JSON, so let's just
         // save its "id", which we will load afterwards
-        let smallItem = new ChatMessage(user.id(), msg);
+        let smallItem = new ChatMessage(userId, msg);
 
         // Get the saved array so far
         messages = localStorage.getItem('messages');
@@ -223,5 +224,8 @@ export class ChatFrame extends Component {
 
         // Redraw now
         m.redraw();
+
+        // Return the object
+        return obj;
     }
 }
