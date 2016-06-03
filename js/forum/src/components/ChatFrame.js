@@ -167,8 +167,15 @@ export class ChatFrame extends Component {
      */
     process(e) {
         if (e.keyCode == 13 && !this.status.loading) {
+            var msg = e.target.value;
+
+            // Assert the message is not empty
+            if (msg.trim().length == 0) {
+                return;
+            }
+
             const data = new FormData();
-            data.append('msg', e.target.value);
+            data.append('msg', msg);
 
             this.status.loading = true;
             e.target.value = '';
