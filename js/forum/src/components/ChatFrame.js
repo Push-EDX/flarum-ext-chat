@@ -26,24 +26,24 @@ export class ChatFrame extends Component {
     }
 
     /**
-     * If the chat is already focused, ignore this click!
+     * Set the chat to active
      */
-    checkFocus(e) {
+    focusIn(e) {
         // Get the chat div from the event target
         var chat = this.getChat(e.target);
-
-        if (chat.className.indexOf("active") >= 0) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            return;
-        }
+        chat.className = "frame active";
     }
 
     /**
-     * Sets the focus to the input when clicking the chat
+     * Focuses the input when clicking the chat
      */
-    setFocus(e) {
+    focusInput(e) {
+        // Skip if it was a drag
+        if (this.status.dragFlagged) {
+            this.status.dragFlagged = false;
+            return;
+        }
+
         // Get the chat div from the event target
         var chat = this.getChat(e.target);
 
@@ -51,6 +51,11 @@ export class ChatFrame extends Component {
         for (let i = 0; i < chat.children.length; ++i) {
             let el = chat.children[i];
             if (el.tagName.toLowerCase() == 'input') {
+                // Skip if already in
+                if (e.target == el) {
+                    return;
+                }
+
                 // Focus it
                 el.focus();
             }
@@ -58,17 +63,25 @@ export class ChatFrame extends Component {
     }
 
     /**
-     * Sets the "active" class to the chat element
+     * If the chat is already focused, ignore this click!
      */
-    focus(e) {
-        e.target.parentNode.className = "frame active";
+    focusOut(e) {
+        // Get the chat div from the event target
+        var chat = this.getChat(e.target);
+        chat.className = "frame";
     }
 
     /**
-     * Remove the "active" class from the chat element
+     * Prevent focusing the input if it is a drag
      */
-    blur(e) {
-        e.target.parentNode.className = "frame";
+    flagDrag(e) {
+        this.status.dragFlagged = this.status.downFlagged && true;
+    }
+    flagDown(e) {
+        this.status.downFlagged = true;
+    }
+    flagUp(e) {
+        this.status.downFlagged = false;
     }
 
     scroll(e) {
@@ -112,30 +125,38 @@ export class ChatFrame extends Component {
      */
     view() {
         return m('div', {className: 'chat left container ' + (this.status.beingShown ? '' : 'hidden')}, [
-            m('div', {className: 'frame', id: 'chat', onmousedown: this.checkFocus.bind(this), onclick: this.setFocus.bind(this) }, [
-                m('div', {id: 'chat-header', onclick: this.toggle.bind(this)}, [
-                    m('h2', 'PushEdx Chat'),
-                ]),
-                this.status.loading ? LoadingIndicator.component({className: 'loading Button-icon'}) : m('span'),
-                m('div', {className: 'wrapper', config: this.scroll.bind(this), onscroll: this.disableAutoScroll.bind(this) }, [
-                    this.status.messages.map(function(o) {
-                        return m('div', {className: 'message-wrapper'}, [
-                            m('span', {className: 'avatar-wrapper'}, avatar(o.user, {className: 'avatar'})),
-                            m('span', {className: 'message'}, o.message),
-                            m('div', {className: 'clear'})
-                        ])
+            m('div', {
+                tabindex: 0,
+                className: 'frame',
+                id: 'chat',
+                onfocusin: this.focusIn.bind(this),
+                onfocusout: this.focusOut.bind(this),
+                onclick: this.focusInput.bind(this),
+                onmousedown: this.flagDown.bind(this),
+                onmousemove: this.flagDrag.bind(this),
+                onmouseup: this.flagUp.bind(this)
+             }, [
+                    m('div', {id: 'chat-header', onclick: this.toggle.bind(this)}, [
+                        m('h2', 'PushEdx Chat'),
+                    ]),
+                    this.status.loading ? LoadingIndicator.component({className: 'loading Button-icon'}) : m('span'),
+                    m('div', {className: 'wrapper', config: this.scroll.bind(this), onscroll: this.disableAutoScroll.bind(this) }, [
+                        this.status.messages.map(function(o) {
+                            return m('div', {className: 'message-wrapper'}, [
+                                m('span', {className: 'avatar-wrapper'}, avatar(o.user, {className: 'avatar'})),
+                                m('span', {className: 'message'}, o.message),
+                                m('div', {className: 'clear'})
+                            ])
+                        })
+                    ]),
+                    m('input', {
+                        type: 'text',
+                        id: 'chat-input',
+                        disabled: !app.forum.attribute('canPostChat'),
+                        placeholder: app.forum.attribute('canPostChat') ? '' : 'Solo los usuarios registrados pueden usar el chat',
+                        onkeyup: this.process.bind(this)
                     })
-                ]),
-                m('input', {
-                    type: 'text',
-                    id: 'chat-input',
-                    disabled: !app.forum.attribute('canPostChat'),
-                    placeholder: app.forum.attribute('canPostChat') ? '' : 'Solo los usuarios registrados pueden usar el chat',
-                    onfocus: this.focus.bind(this),
-                    onblur: this.blur.bind(this),
-                    onkeyup: this.process.bind(this)
-                })
-            ])
+                ])
         ]);
     }
 

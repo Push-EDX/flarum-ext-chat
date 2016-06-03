@@ -5,12 +5,14 @@ import {ChatFrame,ChatMessage} from 'pushedx/realtime-chat/components/ChatFrame'
 
 app.initializers.add('pushedx-realtime-chat', app => {
 
+    let showStatus = localStorage.getItem('beingShown');
+
     let status = {
         loading: false,
         autoScroll: true,
         oldScroll: 0,
         callback: null,
-        beingShown: JSON.parse(localStorage.getItem('beingShown')) || false,
+        beingShown: showStatus === null ? true : JSON.parse(showStatus),
 
         _init: false,
         _messages: [],

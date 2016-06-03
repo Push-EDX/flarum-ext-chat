@@ -39,21 +39,21 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         return el.id == 'chat' ? el : typeof el.parentNode !== 'undefined' ? this.getChat(el.parentNode) : null;
                     }
                 }, {
-                    key: 'checkFocus',
-                    value: function checkFocus(e) {
+                    key: 'focusIn',
+                    value: function focusIn(e) {
                         // Get the chat div from the event target
                         var chat = this.getChat(e.target);
-
-                        if (chat.className.indexOf("active") >= 0) {
-                            e.preventDefault();
-                            e.stopPropagation();
-
-                            return;
-                        }
+                        chat.className = "frame active";
                     }
                 }, {
-                    key: 'setFocus',
-                    value: function setFocus(e) {
+                    key: 'focusInput',
+                    value: function focusInput(e) {
+                        // Skip if it was a drag
+                        if (this.status.dragFlagged) {
+                            this.status.dragFlagged = false;
+                            return;
+                        }
+
                         // Get the chat div from the event target
                         var chat = this.getChat(e.target);
 
@@ -61,20 +61,37 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         for (var i = 0; i < chat.children.length; ++i) {
                             var el = chat.children[i];
                             if (el.tagName.toLowerCase() == 'input') {
+                                // Skip if already in
+                                if (e.target == el) {
+                                    return;
+                                }
+
                                 // Focus it
                                 el.focus();
                             }
                         }
                     }
                 }, {
-                    key: 'focus',
-                    value: function focus(e) {
-                        e.target.parentNode.className = "frame active";
+                    key: 'focusOut',
+                    value: function focusOut(e) {
+                        // Get the chat div from the event target
+                        var chat = this.getChat(e.target);
+                        chat.className = "frame";
                     }
                 }, {
-                    key: 'blur',
-                    value: function blur(e) {
-                        e.target.parentNode.className = "frame";
+                    key: 'flagDrag',
+                    value: function flagDrag(e) {
+                        this.status.dragFlagged = this.status.downFlagged && true;
+                    }
+                }, {
+                    key: 'flagDown',
+                    value: function flagDown(e) {
+                        this.status.downFlagged = true;
+                    }
+                }, {
+                    key: 'flagUp',
+                    value: function flagUp(e) {
+                        this.status.downFlagged = false;
                     }
                 }, {
                     key: 'scroll',
@@ -116,15 +133,23 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 }, {
                     key: 'view',
                     value: function view() {
-                        return m('div', { className: 'chat left container ' + (this.status.beingShown ? '' : 'hidden') }, [m('div', { className: 'frame', id: 'chat', onmousedown: this.checkFocus.bind(this), onclick: this.setFocus.bind(this) }, [m('div', { id: 'chat-header', onclick: this.toggle.bind(this) }, [m('h2', 'PushEdx Chat')]), this.status.loading ? LoadingIndicator.component({ className: 'loading Button-icon' }) : m('span'), m('div', { className: 'wrapper', config: this.scroll.bind(this), onscroll: this.disableAutoScroll.bind(this) }, [this.status.messages.map(function (o) {
+                        return m('div', { className: 'chat left container ' + (this.status.beingShown ? '' : 'hidden') }, [m('div', {
+                            tabindex: 0,
+                            className: 'frame',
+                            id: 'chat',
+                            onfocusin: this.focusIn.bind(this),
+                            onfocusout: this.focusOut.bind(this),
+                            onclick: this.focusInput.bind(this),
+                            onmousedown: this.flagDown.bind(this),
+                            onmousemove: this.flagDrag.bind(this),
+                            onmouseup: this.flagUp.bind(this)
+                        }, [m('div', { id: 'chat-header', onclick: this.toggle.bind(this) }, [m('h2', 'PushEdx Chat')]), this.status.loading ? LoadingIndicator.component({ className: 'loading Button-icon' }) : m('span'), m('div', { className: 'wrapper', config: this.scroll.bind(this), onscroll: this.disableAutoScroll.bind(this) }, [this.status.messages.map(function (o) {
                             return m('div', { className: 'message-wrapper' }, [m('span', { className: 'avatar-wrapper' }, avatar(o.user, { className: 'avatar' })), m('span', { className: 'message' }, o.message), m('div', { className: 'clear' })]);
                         })]), m('input', {
                             type: 'text',
                             id: 'chat-input',
                             disabled: !app.forum.attribute('canPostChat'),
                             placeholder: app.forum.attribute('canPostChat') ? '' : 'Solo los usuarios registrados pueden usar el chat',
-                            onfocus: this.focus.bind(this),
-                            onblur: this.blur.bind(this),
                             onkeyup: this.process.bind(this)
                         })])]);
                     }
@@ -207,12 +232,14 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
 
             app.initializers.add('pushedx-realtime-chat', function (app) {
 
+                var showStatus = localStorage.getItem('beingShown');
+
                 var status = {
                     loading: false,
                     autoScroll: true,
                     oldScroll: 0,
                     callback: null,
-                    beingShown: JSON.parse(localStorage.getItem('beingShown')) || false,
+                    beingShown: showStatus === null ? true : JSON.parse(showStatus),
 
                     _init: false,
                     _messages: [],
