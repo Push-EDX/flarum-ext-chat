@@ -188,36 +188,12 @@ export class ChatFrame extends Component {
 
         // Redraw now
         m.redraw();
-
-        // Do nothing, pusher will
-        //let msg = response.data.id;
-        //this.addMessage(msg, app.session.user)
     }
 
-    addMessage(msg, user, userId) {
+    addMessage(msg, user) {
         // Do note "messages" is a "set", thus = is a function
         var obj = new ChatMessage(user, msg);
         this.status.messages = obj;
-
-        // Local storage can not save the complete use as JSON, so let's just
-        // save its "id", which we will load afterwards
-        let smallItem = new ChatMessage(userId, msg);
-
-        // Get the saved array so far
-        messages = localStorage.getItem('messages');
-        if (messages === null) {
-            // First item, add it as is
-            localStorage.setItem('messages', JSON.stringify([smallItem]));
-        } else {
-            // Get all items
-            messages = JSON.parse(messages);
-            // Only save the last 9
-            messages = messages.splice(-9);
-            // Add the current
-            messages.push(smallItem)
-            // Save now
-            localStorage.setItem('messages', JSON.stringify(messages));
-        }
 
         // End loading
         this.status.loading = false;

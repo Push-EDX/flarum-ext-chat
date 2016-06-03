@@ -165,37 +165,13 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
 
                         // Redraw now
                         m.redraw();
-
-                        // Do nothing, pusher will
-                        //let msg = response.data.id;
-                        //this.addMessage(msg, app.session.user)
                     }
                 }, {
                     key: 'addMessage',
-                    value: function addMessage(msg, user, userId) {
+                    value: function addMessage(msg, user) {
                         // Do note "messages" is a "set", thus = is a function
                         var obj = new ChatMessage(user, msg);
                         this.status.messages = obj;
-
-                        // Local storage can not save the complete use as JSON, so let's just
-                        // save its "id", which we will load afterwards
-                        var smallItem = new ChatMessage(userId, msg);
-
-                        // Get the saved array so far
-                        messages = localStorage.getItem('messages');
-                        if (messages === null) {
-                            // First item, add it as is
-                            localStorage.setItem('messages', JSON.stringify([smallItem]));
-                        } else {
-                            // Get all items
-                            messages = JSON.parse(messages);
-                            // Only save the last 9
-                            messages = messages.splice(-9);
-                            // Add the current
-                            messages.push(smallItem);
-                            // Save now
-                            localStorage.setItem('messages', JSON.stringify(messages));
-                        }
 
                         // End loading
                         this.status.loading = false;
@@ -241,28 +217,7 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                     _init: false,
                     _messages: [],
 
-                    // Getter because app.store.getById returns null if executed now... Why??
                     get messages() {
-                        if (!this._init) {
-                            this._messages = (JSON.parse(localStorage.getItem('messages')) || []).map(function (message) {
-                                if (message.user.data) return message;
-
-                                var user = app.store.getById('users', message.user);
-                                var obj = new ChatMessage(user, message.message);
-
-                                if (user == undefined) {
-                                    app.store.find('users', message.user).then(function (user) {
-                                        obj.user = user;
-                                        m.redraw();
-                                    });
-                                }
-
-                                return obj;
-                            });
-
-                            this._init = true;
-                        }
-
                         return this._messages;
                     },
 
@@ -271,26 +226,45 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                     }
                 };
 
+                function forwardMessage(message) {
+                    var user = app.store.getById('users', message.actorId);
+                    var obj = status.callback(message.message, user);
+
+                    if (user == undefined) {
+                        app.store.find('users', message.actorId).then(function (user) {
+                            obj.user = user;
+                            m.redraw();
+                        });
+                    }
+                }
+
                 extend(HeaderPrimary.prototype, 'config', function (x, isInitialized, context) {
                     if (isInitialized) return;
 
                     app.pusher.then(function (channels) {
                         channels.main.bind('newChat', function (data) {
-                            var user = app.store.getById('users', data.actorId);
-                            var obj = status.callback(data.message, user, data.actorId);
-
-                            if (user == undefined) {
-                                app.store.find('users', data.actorId).then(function (user) {
-                                    obj.user = user;
-                                    m.redraw();
-                                });
-                            }
+                            forwardMessage(data);
                         });
 
                         extend(context, 'onunload', function () {
                             return channels.main.unbind('newChat');
                         });
                     });
+
+                    // Just loaded? Fetch last 10 messages
+                    if (status.messages.length == 0) {
+                        app.request({
+                            method: 'POST',
+                            url: app.forum.attribute('apiUrl') + '/chat/fetch',
+                            serialize: function serialize(raw) {
+                                return raw;
+                            }
+                        }).then(function (response) {
+                            for (var i = 0; i < response.data.attributes.messages.length; ++i) {
+                                forwardMessage(response.data.attributes.messages[i]);
+                            }
+                        }, function (response) {});
+                    }
                 });
 
                 /**

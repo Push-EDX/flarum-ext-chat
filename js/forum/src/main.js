@@ -15,31 +15,7 @@ app.initializers.add('pushedx-realtime-chat', app => {
         _init: false,
         _messages: [],
 
-        // Getter because app.store.getById returns null if executed now... Why??
         get messages() {
-            if (!this._init) {
-                this._messages = (JSON.parse(localStorage.getItem('messages')) || [])
-                    .map(function(message){
-                        if (message.user.data)
-                            return message;
-
-                        var user = app.store.getById('users', message.user);
-                        var obj = new ChatMessage(user, message.message);
-
-                        if (user == undefined)
-                        {
-                            app.store.find('users', message.user).then(function(user){
-                                obj.user = user;
-                                m.redraw();
-                            });
-                        }
-
-                        return obj;
-                    });
-
-                this._init = true;
-            }
-
             return this._messages;
         },
 
@@ -48,25 +24,48 @@ app.initializers.add('pushedx-realtime-chat', app => {
         }
     };
 
+    function forwardMessage(message) {
+        var user = app.store.getById('users', message.actorId);
+        var obj = status.callback(message.message, user);
+
+        if (user == undefined)
+        {
+            app.store.find('users', message.actorId).then(function(user){
+                obj.user = user;
+                m.redraw();
+            });
+        }
+    }
+
     extend(HeaderPrimary.prototype, 'config', function(x, isInitialized, context) {
         if (isInitialized) return;
 
         app.pusher.then(channels => {
             channels.main.bind('newChat', data => {
-                var user = app.store.getById('users', data.actorId);
-                var obj = status.callback(data.message, user, data.actorId);
-
-                if (user == undefined)
-                {
-                    app.store.find('users', data.actorId).then(function(user){
-                        obj.user = user;
-                        m.redraw();
-                    });
-                }
+                forwardMessage(data);
             });
 
             extend(context, 'onunload', () => channels.main.unbind('newChat'));
         });
+
+        // Just loaded? Fetch last 10 messages
+        if (status.messages.length == 0)
+        {
+            app.request({
+                method: 'POST',
+                url: app.forum.attribute('apiUrl') + '/chat/fetch',
+                serialize: raw => raw
+            }).then(
+                function (response) {
+                    for (var i = 0; i < response.data.attributes.messages.length; ++i) {
+                        forwardMessage(response.data.attributes.messages[i]);
+                    }
+                },
+                function (response) {
+
+                }
+            );
+        }
     });
 
     /**

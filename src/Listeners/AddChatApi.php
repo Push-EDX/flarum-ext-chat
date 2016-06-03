@@ -13,6 +13,7 @@
 namespace PushEDX\Chat\Listeners;
 
 use PushEDX\Chat\Api\Controllers\ChatController;
+use PushEDX\Chat\Api\Controllers\FetchChatController;
 use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Event\ConfigureApiRoutes;
 use Flarum\Event\PrepareApiAttributes;
@@ -39,6 +40,7 @@ class AddChatApi
     public function configureApiRoutes(ConfigureApiRoutes $event)
     {
         $event->post('/chat/post', 'pushedx.chat.post', ChatController::class);
+        $event->post('/chat/fetch', 'pushedx.chat.fetch', FetchChatController::class);
     }
 
     /**

@@ -17,7 +17,6 @@ use Carbon\Carbon;
 //use Flagrow\ImageUpload\Events\ImageWillBeSaved;
 //use Flagrow\ImageUpload\Image;
 //use Flagrow\ImageUpload\Validators\ImageValidator;
-use PushEDX\Chat\Api\Controllers\FetchChatController;
 use Flarum\Core\Access\AssertPermissionTrait;
 use Flarum\Core\Repository\PostRepository;
 use Flarum\Core\Repository\UserRepository;
@@ -32,7 +31,7 @@ use League\Flysystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Pusher;
 
-class PostChatHandler
+class FetchChatHandler
 {
     use DispatchEventsTrait;
     use AssertPermissionTrait;
@@ -83,35 +82,8 @@ class PostChatHandler
      *
      * @todo check permission
      */
-    public function handle(PostChat $command)
+    public function handle(FetchChat $command)
     {
-        // check if the user can upload images, otherwise return
-        $this->assertCan(
-            $command->actor,
-            'pushedx.chat.post'
-        );
-
-        $msg = [
-            'actorId' => $command->actor->id,
-            'message' => $command->msg
-        ];
-
-        FetchChatController::UpdateMessages($msg);
-        $pusher = $this->getPusher();
-        $pusher->trigger('public', 'newChat', $msg);
-
-        return $command->msg;
-    }
-
-    /**
-     * @return Pusher
-     */
-    protected function getPusher()
-    {
-        return new Pusher(
-            $this->settings->get('flarum-pusher.app_key'),
-            $this->settings->get('flarum-pusher.app_secret'),
-            $this->settings->get('flarum-pusher.app_id')
-        );
+        return $command;
     }
 }
