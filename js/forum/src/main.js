@@ -6,6 +6,8 @@ import {ChatFrame,ChatMessage} from 'pushedx/realtime-chat/components/ChatFrame'
 app.initializers.add('pushedx-realtime-chat', app => {
 
     let showStatus = localStorage.getItem('beingShown');
+    let isMuted = localStorage.getItem('isMuted');
+    let notify = localStorage.getItem('notify');
 
     let status = {
         loading: false,
@@ -13,6 +15,8 @@ app.initializers.add('pushedx-realtime-chat', app => {
         oldScroll: 0,
         callback: null,
         beingShown: showStatus === null ? true : JSON.parse(showStatus),
+        isMuted: isMuted === null ? false : JSON.parse(isMuted),
+        notify: notify === null ? true : JSON.parse(notify),
 
         _init: false,
         _messages: [],
@@ -26,9 +30,9 @@ app.initializers.add('pushedx-realtime-chat', app => {
         }
     };
 
-    function forwardMessage(message) {
+    function forwardMessage(message, notify) {
         var user = app.store.getById('users', message.actorId);
-        var obj = status.callback(message.message, user);
+        var obj = status.callback(message.message, user, notify);
 
         if (user == undefined)
         {
@@ -60,7 +64,7 @@ app.initializers.add('pushedx-realtime-chat', app => {
             }).then(
                 function (response) {
                     for (var i = 0; i < response.data.attributes.messages.length; ++i) {
-                        forwardMessage(response.data.attributes.messages[i]);
+                        forwardMessage(response.data.attributes.messages[i], false);
                     }
                 },
                 function (response) {
