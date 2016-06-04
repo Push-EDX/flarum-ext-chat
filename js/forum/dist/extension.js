@@ -74,6 +74,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             if (el.tagName.toLowerCase() == 'input') {
                                 // Skip if already in
                                 if (e.target == el) {
+                                    alert('same target');
                                     return;
                                 }
 
@@ -92,7 +93,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 }, {
                     key: 'flagDrag',
                     value: function flagDrag(e) {
-                        this.status.dragFlagged = this.status.downFlagged && true;
+                        this.status.dragFlagged = (e.movementX != 0 || e.movementY != 0) && this.status.downFlagged;
                     }
                 }, {
                     key: 'flagDown',
@@ -160,6 +161,27 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         e.stopPropagation();
                     }
                 }, {
+                    key: 'insertReference',
+                    value: function insertReference(user, e) {
+                        // Get the chat div from the event target
+                        var chat = this.getChat(e.target);
+
+                        // Find the input element
+                        for (var i = 0; i < chat.children.length; ++i) {
+                            var el = chat.children[i];
+                            if (el.tagName.toLowerCase() == 'input') {
+                                // Skip if already in
+                                if (e.target == el) {
+                                    alert('same target');
+                                    return;
+                                }
+
+                                // Insert text
+                                el.value = el.value + " @" + user.username();
+                            }
+                        }
+                    }
+                }, {
                     key: 'view',
                     value: function view() {
                         return m('div', { className: 'chat left container ' + (this.status.beingShown ? '' : 'hidden') }, [m('div', {
@@ -183,8 +205,8 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             src: this.status.notify ? notifyNormal : notifyDisabled,
                             onclick: this.toggleNotifications.bind(this)
                         })])]), this.status.loading ? LoadingIndicator.component({ className: 'loading Button-icon' }) : m('span'), m('div', { className: 'wrapper', config: this.scroll.bind(this), onscroll: this.disableAutoScroll.bind(this) }, [this.status.messages.map(function (o) {
-                            return m('div', { className: 'message-wrapper' }, [m('span', { className: 'avatar-wrapper' }, avatar(o.user, { className: 'avatar' })), m('span', { className: 'message' }, o.message), m('div', { className: 'clear' })]);
-                        })]), m('input', {
+                            return m('div', { className: 'message-wrapper' }, [m('span', { className: 'avatar-wrapper', 'data-name': o.user.username() }, avatar(o.user, { className: 'avatar', onclick: this.insertReference.bind(this, o.user) })), m('span', { className: 'message' }, o.message), m('div', { className: 'clear' })]);
+                        }.bind(this))]), m('input', {
                             type: 'text',
                             id: 'chat-input',
                             disabled: !app.forum.attribute('canPostChat'),

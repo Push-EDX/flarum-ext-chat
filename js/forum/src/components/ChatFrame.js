@@ -64,6 +64,7 @@ export class ChatFrame extends Component {
             if (el.tagName.toLowerCase() == 'input') {
                 // Skip if already in
                 if (e.target == el) {
+                    alert('same target');
                     return;
                 }
 
@@ -86,7 +87,8 @@ export class ChatFrame extends Component {
      * Prevent focusing the input if it is a drag
      */
     flagDrag(e) {
-        this.status.dragFlagged = this.status.downFlagged && true;
+        this.status.dragFlagged = (e.movementX != 0 ||
+            e.movementY != 0) && this.status.downFlagged;
     }
     flagDown(e) {
         this.status.downFlagged = true;
@@ -145,6 +147,26 @@ export class ChatFrame extends Component {
         e.stopPropagation();
     }
 
+    insertReference(user, e) {
+        // Get the chat div from the event target
+        var chat = this.getChat(e.target);
+
+        // Find the input element
+        for (let i = 0; i < chat.children.length; ++i) {
+            let el = chat.children[i];
+            if (el.tagName.toLowerCase() == 'input') {
+                // Skip if already in
+                if (e.target == el) {
+                    alert('same target');
+                    return;
+                }
+
+                // Insert text
+                el.value = el.value + " @" + user.username();
+            }
+        }
+    }
+
     /**
      * Show the actual Chat Frame.
      *
@@ -184,13 +206,14 @@ export class ChatFrame extends Component {
                     ]),
                     this.status.loading ? LoadingIndicator.component({className: 'loading Button-icon'}) : m('span'),
                     m('div', {className: 'wrapper', config: this.scroll.bind(this), onscroll: this.disableAutoScroll.bind(this) }, [
-                        this.status.messages.map(function(o) {
+                        this.status.messages.map((function(o) {
                             return m('div', {className: 'message-wrapper'}, [
-                                m('span', {className: 'avatar-wrapper'}, avatar(o.user, {className: 'avatar'})),
+                                m('span', {className: 'avatar-wrapper', 'data-name': o.user.username()},
+                                    avatar(o.user, {className: 'avatar', onclick: this.insertReference.bind(this, o.user)})),
                                 m('span', {className: 'message'}, o.message),
                                 m('div', {className: 'clear'})
                             ])
-                        })
+                        }).bind(this))
                     ]),
                     m('input', {
                         type: 'text',
