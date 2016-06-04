@@ -49,11 +49,12 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                     key: 'init',
                     value: function init() {
                         this.status = null;
+                        this.chat = null;
                     }
                 }, {
                     key: 'getChat',
                     value: function getChat(el) {
-                        return el.id == 'chat' ? el : typeof el.parentNode !== 'undefined' ? this.getChat(el.parentNode) : null;
+                        return chat || (chat = el.id == 'chat' ? el : typeof el.parentNode !== 'undefined' ? this.getChat(el.parentNode) : null);
                     }
                 }, {
                     key: 'focusIn',
@@ -116,10 +117,12 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         if (this.status.autoScroll) {
                             e.scrollTop = e.scrollHeight;
                         } else {
-                            e.scrollTop = this.status.oldScroll;
+                            if (!this.status.dragFlagged && Math.abs(e.scrollTop - this.status.oldScroll) > 1) {
+                                e.scrollTop = this.status.oldScroll;
+                            }
                         }
 
-                        this.status.autoScroll = e.scrollTop + e.offsetHeight == e.scrollHeight;
+                        this.status.autoScroll = e.scrollTop + e.offsetHeight >= e.scrollHeight;
                         this.status.oldScroll = e.scrollTop;
                     }
                 }, {
@@ -209,7 +212,11 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         }, [m('img', {
                             src: this.status.notify ? notifyNormal : notifyDisabled,
                             onclick: this.toggleNotifications.bind(this)
-                        })])]), this.status.loading ? LoadingIndicator.component({ className: 'loading Button-icon' }) : m('span'), m('div', { className: 'wrapper', config: this.scroll.bind(this), onscroll: this.disableAutoScroll.bind(this) }, [this.status.messages.map(function (o) {
+                        })])]), this.status.loading ? LoadingIndicator.component({ className: 'loading Button-icon' }) : m('span'), m('div', {
+                            className: 'wrapper',
+                            config: this.scroll.bind(this),
+                            onscroll: this.disableAutoScroll.bind(this)
+                        }, [this.status.messages.map(function (o) {
                             return m('div', { className: 'message-wrapper' }, [m('span', { className: 'avatar-wrapper', 'data-name': o.user.username() }, avatar(o.user, { className: 'avatar', onclick: this.insertReference.bind(this, o.user) })), m('span', { className: 'message' }, o.message), m('div', { className: 'clear' })]);
                         }.bind(this))]), m('input', {
                             type: 'text',
@@ -260,7 +267,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                     value: function success(response) {
                         // End loading
                         this.status.loading = false;
-
+                        this.addMessage('asd', app.session.user);
                         // Redraw now
                         m.redraw();
                     }

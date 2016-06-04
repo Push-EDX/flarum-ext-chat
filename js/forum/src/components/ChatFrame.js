@@ -31,14 +31,15 @@ export class ChatFrame extends Component {
      */
     init() {
         this.status = null;
+        this.chat = null;
     }
 
     /**
      * Gets the chat element from the current element
      */
     getChat(el) {
-        return (el.id == 'chat') ? el :
-            ((typeof el.parentNode !== 'undefined') ? this.getChat(el.parentNode) : null);
+        return chat || (chat = ((el.id == 'chat') ? el :
+            ((typeof el.parentNode !== 'undefined') ? this.getChat(el.parentNode) : null)));
     }
 
     /**
@@ -105,10 +106,13 @@ export class ChatFrame extends Component {
         if (this.status.autoScroll) {
             e.scrollTop = e.scrollHeight;
         } else {
-            e.scrollTop = this.status.oldScroll;
+            if (!this.status.dragFlagged &&
+                Math.abs(e.scrollTop - this.status.oldScroll) > 1) {
+                e.scrollTop = this.status.oldScroll;
+            }
         }
 
-        this.status.autoScroll = (e.scrollTop + e.offsetHeight == e.scrollHeight);
+        this.status.autoScroll = (e.scrollTop + e.offsetHeight >= e.scrollHeight);
         this.status.oldScroll = e.scrollTop;
     }
 
@@ -209,7 +213,11 @@ export class ChatFrame extends Component {
                         ]),
                     ]),
                     this.status.loading ? LoadingIndicator.component({className: 'loading Button-icon'}) : m('span'),
-                    m('div', {className: 'wrapper', config: this.scroll.bind(this), onscroll: this.disableAutoScroll.bind(this) }, [
+                    m('div', {
+                        className: 'wrapper',
+                        config: this.scroll.bind(this),
+                        onscroll: this.disableAutoScroll.bind(this)
+                    }, [
                         this.status.messages.map((function(o) {
                             return m('div', {className: 'message-wrapper'}, [
                                 m('span', {className: 'avatar-wrapper', 'data-name': o.user.username()},
@@ -283,7 +291,7 @@ export class ChatFrame extends Component {
     success(response) {
         // End loading
         this.status.loading = false;
-
+        
         // Redraw now
         m.redraw();
     }
