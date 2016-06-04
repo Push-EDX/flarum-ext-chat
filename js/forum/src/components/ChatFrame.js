@@ -38,7 +38,7 @@ export class ChatFrame extends Component {
      * Gets the chat element from the current element
      */
     getChat(el) {
-        return chat || (chat = ((el.id == 'chat') ? el :
+        return this.chat || (this.chat = ((el.id == 'chat') ? el :
             ((typeof el.parentNode !== 'undefined') ? this.getChat(el.parentNode) : null)));
     }
 
@@ -291,7 +291,7 @@ export class ChatFrame extends Component {
     success(response) {
         // End loading
         this.status.loading = false;
-        
+
         // Redraw now
         m.redraw();
     }

@@ -54,7 +54,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 }, {
                     key: 'getChat',
                     value: function getChat(el) {
-                        return chat || (chat = el.id == 'chat' ? el : typeof el.parentNode !== 'undefined' ? this.getChat(el.parentNode) : null);
+                        return this.chat || (this.chat = el.id == 'chat' ? el : typeof el.parentNode !== 'undefined' ? this.getChat(el.parentNode) : null);
                     }
                 }, {
                     key: 'focusIn',
@@ -267,7 +267,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                     value: function success(response) {
                         // End loading
                         this.status.loading = false;
-                        this.addMessage('asd', app.session.user);
+
                         // Redraw now
                         m.redraw();
                     }
