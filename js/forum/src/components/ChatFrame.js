@@ -299,8 +299,9 @@ export class ChatFrame extends Component {
         // Redraw now
         m.redraw();
 
-        // Notify
-        if (typeof notify === "undefined" || notify) {
+        // Notify (if we are not the author!)
+        if ((typeof notify === "undefined" || notify) &&
+            user.id() != app.session.user.id()) {
             this.notify(msg);
         }
 
