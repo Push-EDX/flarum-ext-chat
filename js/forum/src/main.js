@@ -15,8 +15,8 @@ app.initializers.add('pushedx-realtime-chat', app => {
         oldScroll: 0,
         callback: null,
         beingShown: showStatus === null ? true : JSON.parse(showStatus),
-        isMuted: isMuted === null ? false : JSON.parse(isMuted),
-        notify: notify === null ? true : JSON.parse(notify),
+        isMuted: isMuted === null ? true : JSON.parse(isMuted),
+        notify: notify === null ? false : JSON.parse(notify),
 
         _init: false,
         _messages: [],

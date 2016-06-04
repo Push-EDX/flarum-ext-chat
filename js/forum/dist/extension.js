@@ -301,7 +301,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
 
                                         this.notifySound(msg);
                                     }
-                                });
+                                }.bind(this));
                             }
                         } else {
                             this.notifySound(msg);
@@ -351,8 +351,8 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                     oldScroll: 0,
                     callback: null,
                     beingShown: showStatus === null ? true : JSON.parse(showStatus),
-                    isMuted: isMuted === null ? false : JSON.parse(isMuted),
-                    notify: notify === null ? true : JSON.parse(notify),
+                    isMuted: isMuted === null ? true : JSON.parse(isMuted),
+                    notify: notify === null ? false : JSON.parse(notify),
 
                     _init: false,
                     _messages: [],
