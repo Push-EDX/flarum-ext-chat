@@ -33,10 +33,7 @@ class FetchChatSerializer extends AbstractSerializer
         $ret = ['messages' => []];
 
         foreach ($model->msgs->messages as $msg) {
-            $ret['messages'][] = [
-                'message' => $msg->message,
-                'actorId' => $msg->actorId
-            ];
+            $ret['messages'][] = $msg;
         }
 
         return $ret;

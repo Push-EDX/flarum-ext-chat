@@ -12,6 +12,7 @@
 
 namespace PushEDX\Chat\Api\Controllers;
 
+use \PDO;
 use PushEDX\Chat\Api\Serializers\FetchChatSerializer;
 use PushEDX\Chat\Commands\FetchChat;
 use Flarum\Api\Controller\AbstractResourceController;
@@ -43,14 +44,27 @@ class FetchChatController extends AbstractResourceController
         $this->bus = $bus;
     }
 
-    static public function GetMessages($synchro)
+    static public function GetDB()
     {
-        $msgs = $synchro->messages;
+        $db = new PDO('sqlite:/tmp/chatposts.db');
+        $db->exec('CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                                 actorId INTEGER,
+                                                 message varchar(2048))');
 
-        if (!$msgs)
+        return $db;
+    }
+
+    static public function GetMessages($db)
+    {
+        $stmt = $db->prepare('SELECT actorId, message FROM posts ORDER BY id DESC LIMIT 20;');
+        $result = $stmt->execute();
+        $stmt->setFetchMode(PDO::FETCH_ASSOC);
+
+        $msgs = new \stdClass();
+        $msgs->messages = [];
+        while ($row = $stmt->fetch())
         {
-            $msgs = new \stdClass();
-            $msgs->messages = [];
+            $msgs->messages[] = $row;
         }
 
         return $msgs;
@@ -58,11 +72,9 @@ class FetchChatController extends AbstractResourceController
 
     static public function UpdateMessages($msg)
     {
-        $synchro = new Synchro("/tmp/chatposts.sync");
-        $msgs = FetchChatController::GetMessages($synchro);
-        $keep = array_slice($msgs->messages, -9);
-        $keep[] = $msg;
-        $synchro->messages = ["messages" => $keep];
+        $db = FetchChatController::GetDB();
+        $stmt = $db->prepare('INSERT INTO posts (actorId, message) VALUES (?, ?);');
+        $stmt->execute([$msg['actorId'], $msg['message']]);
     }
 
     /**
@@ -74,8 +86,7 @@ class FetchChatController extends AbstractResourceController
      */
     protected function data(ServerRequestInterface $request, Document $document)
     {
-        $synchro = new Synchro("/tmp/chatposts.sync");
-        $msgs = FetchChatController::GetMessages($synchro);
+        $msgs = FetchChatController::GetMessages(FetchChatController::GetDB());
 
         return $this->bus->dispatch(
             new FetchChat($msgs)
