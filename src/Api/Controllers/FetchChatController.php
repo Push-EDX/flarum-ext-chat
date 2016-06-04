@@ -64,7 +64,7 @@ class FetchChatController extends AbstractResourceController
         $msgs->messages = [];
         while ($row = $stmt->fetch())
         {
-            array_unshift($msgs->messages[], $row);
+            array_unshift($msgs->messages, $row);
         }
 
         return $msgs;
