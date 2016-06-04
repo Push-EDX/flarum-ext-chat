@@ -319,13 +319,13 @@ export class ChatFrame extends Component {
                 this.notifySound(msg);
             }
             else if (Notification.permission !== 'denied') {
-                Notification.requestPermission(function (permission) {
+                Notification.requestPermission((function (permission) {
                     if (permission === "granted") {
                         var notification = new Notification(msg);
 
                         this.notifySound(msg);
                     }
-                });
+                }).bind(this));
             }
         }
         else {
