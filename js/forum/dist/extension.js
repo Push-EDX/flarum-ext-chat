@@ -261,9 +261,12 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 }, {
                     key: 'process',
                     value: function process(e) {
-                        if (e.keyCode == 13 && !this.status.loading) {
-                            var msg = e.target.value;
+                        // Save length
+                        var msg = e.target.value;
+                        var changedLength = msg.length != this.status.oldlength;
+                        this.status.oldlength = msg.length;
 
+                        if (e.keyCode == 13 && !this.status.loading) {
                             // Assert the message is not empty
                             if (msg.trim().length == 0) {
                                 m.redraw.strategy('none');
@@ -285,8 +288,10 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                                 },
                                 data: data
                             }).then(this.success.bind(this), this.failure.bind(this));
-                        } else {
+                        } else if (!changedLength) {
                             m.redraw.strategy('none');
+                        } else {
+                            m.redraw();
                         }
                     }
                 }, {

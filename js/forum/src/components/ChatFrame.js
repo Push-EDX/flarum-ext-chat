@@ -280,9 +280,12 @@ export class ChatFrame extends Component {
      * @param e
      */
     process(e) {
-        if (e.keyCode == 13 && !this.status.loading) {
-            var msg = e.target.value;
+        // Save length
+        var msg = e.target.value;
+        var changedLength = msg.length != this.status.oldlength;
+        this.status.oldlength = msg.length;
 
+        if (e.keyCode == 13 && !this.status.loading) {
             // Assert the message is not empty
             if (msg.trim().length == 0) {
                 m.redraw.strategy('none');
@@ -306,8 +309,11 @@ export class ChatFrame extends Component {
                 this.failure.bind(this)
             );
         }
-        else {
+        else if (!changedLength) {
             m.redraw.strategy('none');
+        }
+        else {
+            m.redraw();
         }
     }
 
