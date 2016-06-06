@@ -24,6 +24,8 @@ const soundMuted = 'data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlb
 const notifyNormal = 'data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDU4IDU4IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1OCA1ODsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxwYXRoIHN0eWxlPSJmaWxsOiM4Mzk1OTQ7IiBkPSJNNiwyM2gyNy40NzRDMzIuNTM3LDI0Ljc5NiwzMiwyNi44MzQsMzIsMjlzMC41MzcsNC4yMDQsMS40NzQsNkg2Yy0zLjMxNCwwLTYtMi42ODYtNi02ICBDMCwyNS42ODYsMi42ODYsMjMsNiwyM3oiLz4KPGNpcmNsZSBzdHlsZT0iZmlsbDojNjFCODcyOyIgY3g9IjQ1IiBjeT0iMjkiIHI9IjEzIi8+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=';
 const notifyDisabled = 'data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDU4IDU4IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1OCA1ODsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxwYXRoIHN0eWxlPSJmaWxsOiM4Mzk1OTQ7IiBkPSJNNTIsMjNIMjQuNTI2QzI1LjQ2MywyNC43OTYsMjYsMjYuODM0LDI2LDI5cy0wLjUzNyw0LjIwNC0xLjQ3NCw2SDUyYzMuMzE0LDAsNi0yLjY4Niw2LTYgIFM1NS4zMTQsMjMsNTIsMjN6Ii8+CjxjaXJjbGUgc3R5bGU9ImZpbGw6I0M3Q0FDNzsiIGN4PSIxMyIgY3k9IjI5IiByPSIxMyIvPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8L3N2Zz4K';
 
+const maxLength = 512;
+
 export class ChatFrame extends Component {
 
     /**
@@ -197,13 +199,17 @@ export class ChatFrame extends Component {
         input.focus();
     }
 
+    reachedLimit() {
+        this.status.oldReached = (maxLength - (this.status.oldlength || 0)) < 100;
+        return this.status.oldReached;
+    }
+
     /**
      * Show the actual Chat Frame.
      *
      * @returns {*}
      */
     view() {
-        console.log('view');
         return m('div', {className: 'chat left container ' + (this.status.beingShown ? '' : 'hidden')}, [
             m('div', {
                 tabindex: 0,
@@ -253,10 +259,17 @@ export class ChatFrame extends Component {
                     m('input', {
                         type: 'text',
                         id: 'chat-input',
+                        className: this.reachedLimit() ? 'reaching-limit' : '',
+                        maxlength: maxLength,
                         disabled: !app.forum.attribute('canPostChat'),
                         placeholder: app.forum.attribute('canPostChat') ? '' : 'Solo los usuarios registrados pueden usar el chat',
-                        onkeyup: this.process.bind(this)
-                    })
+                        onkeyup: this.process.bind(this),
+                        onkeydown: this.checkLimit.bind(this),
+                    }),
+                    m('span', {
+                        id: 'chat-limitter',
+                        className: this.reachedLimit() ? 'reaching-limit' : '',
+                    }, "" + (maxLength - (this.status.oldlength || 0)))
                 ])
         ]);
     }
@@ -295,6 +308,19 @@ export class ChatFrame extends Component {
         }
         else {
             m.redraw.strategy('none');
+        }
+    }
+
+    checkLimit(e) {
+        // Save length
+        var msg = e.target.value;
+        this.status.oldlength = msg.length;
+
+        if (!this.status.oldReached && !this.reachedLimit()) {
+            m.redraw.strategy('none');
+        }
+        else {
+            m.redraw();
         }
     }
 

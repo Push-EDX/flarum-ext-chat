@@ -1,7 +1,7 @@
 'use strict';
 
 System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component', 'flarum/helpers/icon', 'flarum/components/LoadingIndicator', 'flarum/helpers/avatar'], function (_export, _context) {
-    var Component, icon, LoadingIndicator, avatar, refAudioNotification, refAudio, audioNotification, audio, soundNormal, soundMuted, notifyNormal, notifyDisabled, ChatFrame;
+    var Component, icon, LoadingIndicator, avatar, refAudioNotification, refAudio, audioNotification, audio, soundNormal, soundMuted, notifyNormal, notifyDisabled, maxLength, ChatFrame;
     return {
         setters: [function (_flarumComponent) {
             Component = _flarumComponent.default;
@@ -36,6 +36,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
             soundMuted = 'data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDQ4My43ODggNDgzLjc4OCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNDgzLjc4OCA0ODMuNzg4OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgd2lkdGg9IjMycHgiIGhlaWdodD0iMzJweCI+CjxnPgoJPGc+CgkJPHBhdGggZD0iTTE4Nyw0MDkuMDQxYzI4LjksMTcuMSw2Mi43LDI2LjIsOTYuMywyNS45aDAuM2MxMC40LTAuMSwxOC43LTguNSwxOC42LTE4LjljLTAuMi0yMy43LTAuNS00Ny40LTEtNzEuMSAgICBjMC40LTE4LjIsMC43LTM2LjQsMS4xLTU0LjZjMS4xLTc0LDEuNy0xNDcuOSwwLjktMjIxLjd2LTAuNGMtMC4xLTEwLjgtOS0xOS41LTE5LjgtMTkuNGMtNDYuMiwwLjQtOTIsMTguNS0xMjUuMSw0OS42ICAgIGMtMTMuMiwxMi4yLTIyLjYsMjUuOS0yNy4xLDM2LjZjLTIuNCw1LjItMy4zLDkuOS0zLjQsMTMuMmMwLDMuMywxLDUuNCwzLjMsNmM4LjcsMi4zLDIzLjktMTQuNiw0OC0zMy45ICAgIGMyNS0yMC40LDU2LjEtMzIuMiw4Ny44LTM0LjljLTAuMSwxMy45LTAuMiwyNy45LTAuMiw0MS44YzAuMyw5MS41LDIuMSwxODMsMy40LDI3NC41Yy0yMy43LTMuNS00Ni4zLTExLjktNjYtMjQuNiAgICBjLTIyLjYtMTQuNS00MS41LTM0LjUtNTQuNS01Ny44Yy0zLjItNS43LTkuMy05LjYtMTYuMy05LjdoLTAuNWMtMTQuNS0wLjEtMjkuMS0wLjMtNDMuNy0wLjRsLTIxLjktMC4xSDU2LjNoLTIuN2wtMS40LTAuMSAgICBjLTAuOSwwLTEuOC0wLjMtMi43LTAuM2MtNy0xLjQtMTMtNy4yLTE0LjYtMTQuMmMtMC40LTEuMS0wLjItMS4xLTAuNC0xLjZsLTAuMS0yLjd2LTAuN3YtMC4xdi0wLjl2LTEwLjlsLTAuMS0yMS45bDAtNDMuOHYtMTAuOSAgICB2LTUuNWMwLTEuMSwwLjEtMS4yLDAuMS0xLjhjMC4xLTAuNSwwLTAuOSwwLjEtMS40YzAuMi0xLjgsMC43LTMuNSwxLjQtNS4yYzAuOC0xLjYsMS43LTMuMiwyLjgtNC43YzIuMy0yLjgsNS40LTUsOC44LTYuMiAgICBjMC44LTAuNCwxLjgtMC41LDIuNS0wLjdjMC42LDAsMC4zLTAuMiwyLjctMC4zbDEuNC0wLjFoMC4yaDAuMmgyLjdoNS41YzE0LjYsMC4xLDI5LjEsMC4zLDQzLjcsMC40YzcuOCwwLjEsMjAuMS0zLjQsMjQtNS44ICAgIGM3LjctNC45LTIuMy05LTE3LjItMTIuMWMtMTIuMy0yLjYtMjUuMy00LjgtMzguNy02LjdjLTMuNC0wLjQtNi44LTAuOS0xMC4yLTEuNGwtNS4yLTAuNmwtMi42LTAuM2wtMS4zLTAuMmwtMC43LTAuMWgtMC4zSDU0ICAgIGgtMC4xaC0wLjRsLTIuNi0wLjJsLTEuMy0wLjFsLTEuNywwLjFsLTMuNCwwLjJsLTMuMiwwLjVjLTQuMiwwLjgtOC40LDIuMi0xMi40LDQuMmMtNy45LDQtMTQuOSwxMC41LTE5LjYsMTguNiAgICBjLTIuNCw0LTQuMSw4LjYtNS4zLDEzLjJjLTEuMiw0LjYtMS40LDEwLjEtMS41LDEzLjNjLTAuOCwxNC45LTEuMywzMC4xLTEuNiw0NS4ybC0wLjksNDcuNWwwLjEsMi45djAuN2wwLjEsMS4xbDAuMywyLjMgICAgYzAuNCwzLjIsMS4xLDUuNSwxLjgsOC4yYzEuNiw1LjIsNCwxMC4xLDYuOSwxNC42YzYuMSw5LDE0LjgsMTYuMiwyNSwyMC4yYzUuMSwyLjEsMTAuNSwzLjMsMTUuOSwzLjhsNCwwLjJsMi45LDAuMWw1LjgsMC4xICAgIGwyMy40LDAuNWwzNi43LDAuN0MxMzguOSwzNzIuMDQxLDE2MSwzOTMuNzQxLDE4Nyw0MDkuMDQxeiIgZmlsbD0iI0ZGRkZGRiIvPgoJCTxwYXRoIGQ9Ik0zNDMsMjg1LjY0MWMtMi45LDQuNS0yLjcsMTAuOSw0LDE3YzYuMSw1LjYsMTMsNy4zLDE3LjUsNC4yYzguMS01LjYsMTYuMy0xMS4yLDIzLTE4LjJjNy4xLTcuNCwxMy43LTE1LjQsMjAuMi0yMy4zICAgIGMxLjcsMi4yLDMuMyw0LjQsNS4xLDYuNWMxMS45LDE0LjMsMjQuNywyNy44LDQwLjcsMzcuOWM0LjUsMi45LDEwLjksMi43LDE3LTRjNS42LTYuMSw3LjMtMTMsNC4yLTE3LjUgICAgYy01LjYtOC4xLTExLjItMTYuMy0xOC4yLTIzYy03LjUtNy4yLTE1LjUtMTMuOC0yMy41LTIwLjRjMTkuMy0xMywzMi44LTMyLDUwLjQtNDYuOWMxLTAuOC0wLjEtNC43LTEuNC02LjkgICAgYy0yLjYtNC4zLTYuNi02LjEtMTAuNS02LjZjLTEyLjktMS43LTIyLjksMS45LTMwLjYsOGMtMTAuMiw4LTIwLjcsMTUuNi0zMC41LDI0Yy0xMi44LTE3LjUtMzAuNi0zMC41LTQ0LjUtNDcgICAgYy0wLjgtMS00LjcsMC4xLTYuOSwxLjRjLTQuMywyLjYtNi4xLDYuNi02LjYsMTAuNWMtMS43LDEyLjksMS45LDIyLjksOCwzMC42YzgsMTAuMiwxNS42LDIwLjcsMjQsMzAuNGMtMS4xLDAuOS0yLjIsMS43LTMuMywyLjYgICAgQzM2Ni43LDI1Ni45NDEsMzUzLjIsMjY5LjY0MSwzNDMsMjg1LjY0MXoiIGZpbGw9IiNGRkZGRkYiLz4KCTwvZz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8L3N2Zz4K';
             notifyNormal = 'data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDU4IDU4IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1OCA1ODsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxwYXRoIHN0eWxlPSJmaWxsOiM4Mzk1OTQ7IiBkPSJNNiwyM2gyNy40NzRDMzIuNTM3LDI0Ljc5NiwzMiwyNi44MzQsMzIsMjlzMC41MzcsNC4yMDQsMS40NzQsNkg2Yy0zLjMxNCwwLTYtMi42ODYtNi02ICBDMCwyNS42ODYsMi42ODYsMjMsNiwyM3oiLz4KPGNpcmNsZSBzdHlsZT0iZmlsbDojNjFCODcyOyIgY3g9IjQ1IiBjeT0iMjkiIHI9IjEzIi8+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=';
             notifyDisabled = 'data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDU4IDU4IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1OCA1ODsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxwYXRoIHN0eWxlPSJmaWxsOiM4Mzk1OTQ7IiBkPSJNNTIsMjNIMjQuNTI2QzI1LjQ2MywyNC43OTYsMjYsMjYuODM0LDI2LDI5cy0wLjUzNyw0LjIwNC0xLjQ3NCw2SDUyYzMuMzE0LDAsNi0yLjY4Niw2LTYgIFM1NS4zMTQsMjMsNTIsMjN6Ii8+CjxjaXJjbGUgc3R5bGU9ImZpbGw6I0M3Q0FDNzsiIGN4PSIxMyIgY3k9IjI5IiByPSIxMyIvPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8L3N2Zz4K';
+            maxLength = 512;
 
             _export('ChatFrame', ChatFrame = function (_Component) {
                 babelHelpers.inherits(ChatFrame, _Component);
@@ -209,9 +210,14 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         input.focus();
                     }
                 }, {
+                    key: 'reachedLimit',
+                    value: function reachedLimit() {
+                        this.status.oldReached = maxLength - (this.status.oldlength || 0) < 100;
+                        return this.status.oldReached;
+                    }
+                }, {
                     key: 'view',
                     value: function view() {
-                        console.log('view');
                         return m('div', { className: 'chat left container ' + (this.status.beingShown ? '' : 'hidden') }, [m('div', {
                             tabindex: 0,
                             className: 'frame',
@@ -241,10 +247,16 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         }.bind(this))]), m('input', {
                             type: 'text',
                             id: 'chat-input',
+                            className: this.reachedLimit() ? 'reaching-limit' : '',
+                            maxlength: maxLength,
                             disabled: !app.forum.attribute('canPostChat'),
                             placeholder: app.forum.attribute('canPostChat') ? '' : 'Solo los usuarios registrados pueden usar el chat',
-                            onkeyup: this.process.bind(this)
-                        })])]);
+                            onkeyup: this.process.bind(this),
+                            onkeydown: this.checkLimit.bind(this)
+                        }), m('span', {
+                            id: 'chat-limitter',
+                            className: this.reachedLimit() ? 'reaching-limit' : ''
+                        }, "" + (maxLength - (this.status.oldlength || 0)))])]);
                     }
                 }, {
                     key: 'process',
@@ -275,6 +287,19 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             }).then(this.success.bind(this), this.failure.bind(this));
                         } else {
                             m.redraw.strategy('none');
+                        }
+                    }
+                }, {
+                    key: 'checkLimit',
+                    value: function checkLimit(e) {
+                        // Save length
+                        var msg = e.target.value;
+                        this.status.oldlength = msg.length;
+
+                        if (!this.status.oldReached && !this.reachedLimit()) {
+                            m.redraw.strategy('none');
+                        } else {
+                            m.redraw();
                         }
                     }
                 }, {
