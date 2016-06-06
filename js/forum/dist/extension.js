@@ -50,6 +50,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                     value: function init() {
                         this.status = null;
                         this.chat = null;
+                        this.input = null;
                     }
                 }, {
                     key: 'getChat',
@@ -57,17 +58,38 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         return this.chat || (this.chat = el.id == 'chat' ? el : typeof el.parentNode !== 'undefined' ? this.getChat(el.parentNode) : null);
                     }
                 }, {
+                    key: 'getInput',
+                    value: function getInput(chat) {
+                        if (!this.input) {
+                            // Find the input element
+                            for (var i = 0; i < chat.children.length; ++i) {
+                                var el = chat.children[i];
+                                if (el.tagName.toLowerCase() == 'input') {
+                                    this.input = el;
+                                    break;
+                                }
+                            }
+                        }
+
+                        return this.input;
+                    }
+                }, {
                     key: 'focusIn',
                     value: function focusIn(e) {
                         // Get the chat div from the event target
                         var chat = this.getChat(e.target);
-                        chat.className = "frame active";
+                        if (chat.className.indexOf('active') < 0) {
+                            chat.className = "frame active";
+                        } else {
+                            m.redraw.strategy('none');
+                        }
                     }
                 }, {
                     key: 'focusInput',
                     value: function focusInput(e) {
                         // Skip if it was a drag
                         if (this.status.dragFlagged) {
+                            m.redraw.strategy('none');
                             this.status.dragFlagged = false;
                             return;
                         }
@@ -76,18 +98,16 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         var chat = this.getChat(e.target);
 
                         // Find the input element
-                        for (var i = 0; i < chat.children.length; ++i) {
-                            var el = chat.children[i];
-                            if (el.tagName.toLowerCase() == 'input') {
-                                // Skip if already in
-                                if (e.target == el) {
-                                    return;
-                                }
+                        var input = this.getInput(chat);
 
-                                // Focus it
-                                el.focus();
-                            }
+                        // Skip if already in
+                        if (e.target == input) {
+                            m.redraw.strategy('none');
+                            return;
                         }
+
+                        // Focus it
+                        input.focus();
                     }
                 }, {
                     key: 'focusOut',
@@ -99,21 +119,26 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 }, {
                     key: 'flagDrag',
                     value: function flagDrag(e) {
+                        m.redraw.strategy('none');
                         this.status.dragFlagged = (e.movementX != 0 || e.movementY != 0) && this.status.downFlagged;
                     }
                 }, {
                     key: 'flagDown',
                     value: function flagDown(e) {
+                        m.redraw.strategy('none');
                         this.status.downFlagged = true;
                     }
                 }, {
                     key: 'flagUp',
                     value: function flagUp(e) {
+                        m.redraw.strategy('none');
                         this.status.downFlagged = false;
                     }
                 }, {
                     key: 'scroll',
                     value: function scroll(e) {
+                        m.redraw.strategy('none');
+
                         if (this.status.autoScroll) {
                             e.scrollTop = e.scrollHeight;
                         } else {
@@ -128,6 +153,8 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 }, {
                     key: 'disableAutoScroll',
                     value: function disableAutoScroll(e) {
+                        m.redraw.strategy('none');
+
                         var el = e.target;
                         this.status.autoScroll = false;
                         this.status.oldScroll = el.scrollTop;
@@ -175,23 +202,16 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         var chat = this.getChat(e.target);
 
                         // Find the input element
-                        for (var i = 0; i < chat.children.length; ++i) {
-                            var el = chat.children[i];
-                            if (el.tagName.toLowerCase() == 'input') {
-                                // Skip if already in
-                                if (e.target == el) {
-                                    return;
-                                }
+                        var input = this.getInput(chat);
 
-                                // Insert text
-                                el.value = el.value + " @" + user.username() + " ";
-                                el.focus();
-                            }
-                        }
+                        // Insert text
+                        input.value = input.value + " @" + user.username() + " ";
+                        input.focus();
                     }
                 }, {
                     key: 'view',
                     value: function view() {
+                        console.log('view');
                         return m('div', { className: 'chat left container ' + (this.status.beingShown ? '' : 'hidden') }, [m('div', {
                             tabindex: 0,
                             className: 'frame',
@@ -234,6 +254,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
 
                             // Assert the message is not empty
                             if (msg.trim().length == 0) {
+                                m.redraw.strategy('none');
                                 return;
                             }
 
@@ -252,6 +273,8 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                                 },
                                 data: data
                             }).then(this.success.bind(this), this.failure.bind(this));
+                        } else {
+                            m.redraw.strategy('none');
                         }
                     }
                 }, {

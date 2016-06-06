@@ -32,6 +32,7 @@ export class ChatFrame extends Component {
     init() {
         this.status = null;
         this.chat = null;
+        this.input = null;
     }
 
     /**
@@ -43,12 +44,35 @@ export class ChatFrame extends Component {
     }
 
     /**
+     * Gets the chat input
+     */
+    getInput(chat) {
+        if (!this.input) {
+            // Find the input element
+            for (let i = 0; i < chat.children.length; ++i) {
+                let el = chat.children[i];
+                if (el.tagName.toLowerCase() == 'input') {
+                    this.input = el;
+                    break;
+                }
+            }
+        }
+
+        return this.input;
+    }
+
+    /**
      * Set the chat to active
      */
     focusIn(e) {
         // Get the chat div from the event target
         var chat = this.getChat(e.target);
-        chat.className = "frame active";
+        if (chat.className.indexOf('active') < 0) {
+            chat.className = "frame active";
+        }
+        else {
+            m.redraw.strategy('none');
+        }
     }
 
     /**
@@ -57,6 +81,7 @@ export class ChatFrame extends Component {
     focusInput(e) {
         // Skip if it was a drag
         if (this.status.dragFlagged) {
+            m.redraw.strategy('none');
             this.status.dragFlagged = false;
             return;
         }
@@ -65,18 +90,16 @@ export class ChatFrame extends Component {
         var chat = this.getChat(e.target);
 
         // Find the input element
-        for (let i = 0; i < chat.children.length; ++i) {
-            let el = chat.children[i];
-            if (el.tagName.toLowerCase() == 'input') {
-                // Skip if already in
-                if (e.target == el) {
-                    return;
-                }
+        var input = this.getInput(chat);
 
-                // Focus it
-                el.focus();
-            }
+        // Skip if already in
+        if (e.target == input) {
+            m.redraw.strategy('none');
+            return;
         }
+
+        // Focus it
+        input.focus();
     }
 
     /**
@@ -92,17 +115,22 @@ export class ChatFrame extends Component {
      * Prevent focusing the input if it is a drag
      */
     flagDrag(e) {
-        this.status.dragFlagged = (e.movementX != 0 ||
-            e.movementY != 0) && this.status.downFlagged;
+        m.redraw.strategy('none');
+        this.status.dragFlagged = (e.movementX != 0 || e.movementY != 0) &&
+            this.status.downFlagged;
     }
     flagDown(e) {
+        m.redraw.strategy('none');
         this.status.downFlagged = true;
     }
     flagUp(e) {
+        m.redraw.strategy('none');
         this.status.downFlagged = false;
     }
 
     scroll(e) {
+        m.redraw.strategy('none');
+
         if (this.status.autoScroll) {
             e.scrollTop = e.scrollHeight;
         } else {
@@ -117,6 +145,8 @@ export class ChatFrame extends Component {
     }
 
     disableAutoScroll(e) {
+        m.redraw.strategy('none');
+
         let el = e.target;
         this.status.autoScroll = false;
         this.status.oldScroll = el.scrollTop;
@@ -160,19 +190,11 @@ export class ChatFrame extends Component {
         var chat = this.getChat(e.target);
 
         // Find the input element
-        for (let i = 0; i < chat.children.length; ++i) {
-            let el = chat.children[i];
-            if (el.tagName.toLowerCase() == 'input') {
-                // Skip if already in
-                if (e.target == el) {
-                    return;
-                }
+        var input = this.getInput(chat);
 
-                // Insert text
-                el.value = el.value + " @" + user.username() + " ";
-                el.focus();
-            }
-        }
+        // Insert text
+        input.value = input.value + " @" + user.username() + " ";
+        input.focus();
     }
 
     /**
@@ -181,6 +203,7 @@ export class ChatFrame extends Component {
      * @returns {*}
      */
     view() {
+        console.log('view');
         return m('div', {className: 'chat left container ' + (this.status.beingShown ? '' : 'hidden')}, [
             m('div', {
                 tabindex: 0,
@@ -249,6 +272,7 @@ export class ChatFrame extends Component {
 
             // Assert the message is not empty
             if (msg.trim().length == 0) {
+                m.redraw.strategy('none');
                 return;
             }
 
@@ -268,6 +292,9 @@ export class ChatFrame extends Component {
                 this.success.bind(this),
                 this.failure.bind(this)
             );
+        }
+        else {
+            m.redraw.strategy('none');
         }
     }
 
