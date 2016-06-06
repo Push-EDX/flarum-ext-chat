@@ -296,6 +296,7 @@ export class ChatFrame extends Component {
             data.append('msg', msg);
 
             this.status.loading = true;
+            this.status.oldlength = 0;
             e.target.value = '';
             m.redraw();
 

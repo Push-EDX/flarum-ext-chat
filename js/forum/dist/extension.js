@@ -277,6 +277,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             data.append('msg', msg);
 
                             this.status.loading = true;
+                            this.status.oldlength = 0;
                             e.target.value = '';
                             m.redraw();
 
