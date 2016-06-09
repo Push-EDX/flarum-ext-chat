@@ -265,6 +265,7 @@ export class ChatFrame extends Component {
                         placeholder: app.forum.attribute('canPostChat') ? '' : 'Solo los usuarios registrados pueden usar el chat',
                         onkeyup: this.process.bind(this),
                         onkeydown: this.checkLimit.bind(this),
+                        config: (e) => this.status.loading && e != document.activeElement && e.focus()
                     }),
                     m('span', {
                         id: 'chat-limitter',
@@ -280,10 +281,7 @@ export class ChatFrame extends Component {
      * @param e
      */
     process(e) {
-        // Save length
         var msg = e.target.value;
-        var changedLength = msg.length != this.status.oldlength;
-        this.status.oldlength = msg.length;
 
         if (e.keyCode == 13 && !this.status.loading) {
             // Assert the message is not empty
@@ -310,24 +308,28 @@ export class ChatFrame extends Component {
                 this.failure.bind(this)
             );
         }
-        else if (!changedLength) {
+        else if (!this.status.oldReached) {
             m.redraw.strategy('none');
-        }
-        else {
-            m.redraw();
         }
     }
 
     checkLimit(e) {
-        // Save length
-        var msg = e.target.value;
-        this.status.oldlength = msg.length;
+        var redraw = false;
+        var now = +new Date;
+        if (!this.status.lastChecked || now > this.status.lastChecked + 50) {
+            this.status.lastChecked = now;
 
-        if (!this.status.oldReached && !this.reachedLimit()) {
-            m.redraw.strategy('none');
+            // Save length
+            var msg = e.target.value;
+            this.status.oldlength = msg.length;
+
+            if (this.status.oldReached || this.reachedLimit()) {
+                redraw = true;
+            }
         }
-        else {
-            m.redraw();
+
+        if (!redraw) {
+            m.redraw.strategy('none');
         }
     }
 

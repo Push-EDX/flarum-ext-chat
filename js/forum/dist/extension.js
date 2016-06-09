@@ -218,6 +218,8 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 }, {
                     key: 'view',
                     value: function view() {
+                        var _this2 = this;
+
                         return m('div', { className: 'chat left container ' + (this.status.beingShown ? '' : 'hidden') }, [m('div', {
                             tabindex: 0,
                             className: 'frame',
@@ -252,7 +254,10 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             disabled: !app.forum.attribute('canPostChat'),
                             placeholder: app.forum.attribute('canPostChat') ? '' : 'Solo los usuarios registrados pueden usar el chat',
                             onkeyup: this.process.bind(this),
-                            onkeydown: this.checkLimit.bind(this)
+                            onkeydown: this.checkLimit.bind(this),
+                            config: function config(e) {
+                                return _this2.status.loading && e != document.activeElement && e.focus();
+                            }
                         }), m('span', {
                             id: 'chat-limitter',
                             className: this.reachedLimit() ? 'reaching-limit' : ''
@@ -261,10 +266,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 }, {
                     key: 'process',
                     value: function process(e) {
-                        // Save length
                         var msg = e.target.value;
-                        var changedLength = msg.length != this.status.oldlength;
-                        this.status.oldlength = msg.length;
 
                         if (e.keyCode == 13 && !this.status.loading) {
                             // Assert the message is not empty
@@ -289,23 +291,31 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                                 },
                                 data: data
                             }).then(this.success.bind(this), this.failure.bind(this));
-                        } else if (!changedLength) {
+                        } else if (!this.status.oldReached) {
                             m.redraw.strategy('none');
                         } else {
-                            m.redraw();
+                            //m.redraw();
                         }
                     }
                 }, {
                     key: 'checkLimit',
                     value: function checkLimit(e) {
-                        // Save length
-                        var msg = e.target.value;
-                        this.status.oldlength = msg.length;
+                        var redraw = false;
+                        var now = +new Date();
+                        if (!this.status.lastChecked || now > this.status.lastChecked + 50) {
+                            this.status.lastChecked = now;
 
-                        if (!this.status.oldReached && !this.reachedLimit()) {
+                            // Save length
+                            var msg = e.target.value;
+                            this.status.oldlength = msg.length;
+
+                            if (this.status.oldReached || this.reachedLimit()) {
+                                redraw = true;
+                            }
+                        }
+
+                        if (!redraw) {
                             m.redraw.strategy('none');
-                        } else {
-                            m.redraw();
                         }
                     }
                 }, {
@@ -473,6 +483,10 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                  */
                 extend(HeaderPrimary.prototype, 'items', function (items) {
                     var chatFrame = new ChatFrame();
+                    var realView = chatFrame.view;
+                    chatFrame.view = function () {
+                        return realView.call(chatFrame);
+                    };
                     chatFrame.status = status;
                     status.callback = chatFrame.addMessage.bind(chatFrame);
                     items.add('pushedx-chat-frame', chatFrame);
