@@ -249,7 +249,7 @@ export class ChatFrame extends Component {
                     }, [
                         this.status.messages.map((function(o) {
                             return m('div', {className: 'message-wrapper'}, [
-                                m('span', {className: 'avatar-wrapper', 'data-name': o.user.username()},
+                                m('span', {className: 'avatar-wrapper', 'data-name': o.user ? o.user.username() : 'Loading...'},
                                     avatar(o.user, {className: 'avatar', onclick: this.insertReference.bind(this, o.user)})),
                                 m('span', {className: 'message'}, o.message),
                                 m('div', {className: 'clear'})

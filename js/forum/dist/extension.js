@@ -243,7 +243,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             config: this.scroll.bind(this),
                             onscroll: this.disableAutoScroll.bind(this)
                         }, [this.status.messages.map(function (o) {
-                            return m('div', { className: 'message-wrapper' }, [m('span', { className: 'avatar-wrapper', 'data-name': o.user.username() }, avatar(o.user, { className: 'avatar', onclick: this.insertReference.bind(this, o.user) })), m('span', { className: 'message' }, o.message), m('div', { className: 'clear' })]);
+                            return m('div', { className: 'message-wrapper' }, [m('span', { className: 'avatar-wrapper', 'data-name': o.user ? o.user.username() : 'Loading...' }, avatar(o.user, { className: 'avatar', onclick: this.insertReference.bind(this, o.user) })), m('span', { className: 'message' }, o.message), m('div', { className: 'clear' })]);
                         }.bind(this))]), m('input', {
                             type: 'text',
                             id: 'chat-input',
