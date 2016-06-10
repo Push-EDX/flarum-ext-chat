@@ -147,14 +147,14 @@ export class ChatFrame extends Component {
             e.scrollTop = e.scrollHeight + this.status.oldScroll - 30;
         }
 
-        this.status.autoScroll = (e.scrollTop + e.offsetHeight >= e.scrollHeight);
+        this.status.autoScroll = this.status.autoScroll || (e.scrollTop + e.offsetHeight >= e.scrollHeight);
         this.status.oldScroll = e.scrollTop;
         this.wrapper = e;
     }
 
     disableAutoScroll(e) {
         let el = e.target;
-        this.status.autoScroll = false;
+        this.status.autoScroll = (e.scrollTop + e.offsetHeight >= e.scrollHeight);
         let currentHeight = el.scrollHeight;
 
         // Load older messages
@@ -258,6 +258,10 @@ export class ChatFrame extends Component {
         }
     }
 
+    parseMessage(e) {
+        s9e.TextFormatter.preview(e.dataset.message, e);
+    }
+
     /**
      * Show the actual Chat Frame.
      *
@@ -310,7 +314,7 @@ export class ChatFrame extends Component {
                             return m('div', {className: 'message-wrapper'}, [
                                 m('span', {className: 'avatar-wrapper', 'data-name': o.user ? o.user.username() : 'Loading...'},
                                     avatar(o.user, {className: 'avatar', onclick: this.insertReference.bind(this, o.user)})),
-                                m('span', {className: 'message'}, o.message),
+                                m('span', {className: 'message', 'data-message': o.message, config: this.parseMessage.bind(this) }),
                                 m('div', {className: 'clear'})
                             ])
                         }).bind(this))

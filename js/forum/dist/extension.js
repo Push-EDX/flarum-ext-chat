@@ -153,7 +153,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             e.scrollTop = e.scrollHeight + this.status.oldScroll - 30;
                         }
 
-                        this.status.autoScroll = e.scrollTop + e.offsetHeight >= e.scrollHeight;
+                        this.status.autoScroll = this.status.autoScroll || e.scrollTop + e.offsetHeight >= e.scrollHeight;
                         this.status.oldScroll = e.scrollTop;
                         this.wrapper = e;
                     }
@@ -161,7 +161,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                     key: 'disableAutoScroll',
                     value: function disableAutoScroll(e) {
                         var el = e.target;
-                        this.status.autoScroll = false;
+                        this.status.autoScroll = e.scrollTop + e.offsetHeight >= e.scrollHeight;
                         var currentHeight = el.scrollHeight;
 
                         // Load older messages
@@ -268,6 +268,11 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         }
                     }
                 }, {
+                    key: 'parseMessage',
+                    value: function parseMessage(e) {
+                        s9e.TextFormatter.preview(e.dataset.message, e);
+                    }
+                }, {
                     key: 'view',
                     value: function view() {
                         return m('div', { className: 'chat left container ' + (this.status.beingShown ? '' : 'hidden') }, [m('div', {
@@ -295,7 +300,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             config: this.scroll.bind(this),
                             onscroll: this.disableAutoScroll.bind(this)
                         }, [this.status.loadingOld ? m('div', { className: 'message-wrapper' }, [m('span', { className: 'message' }, LoadingIndicator.component({ className: 'loading-old Button-icon' })), m('div', { className: 'clear' })]) : undefined, this.status.messages.map(function (o) {
-                            return m('div', { className: 'message-wrapper' }, [m('span', { className: 'avatar-wrapper', 'data-name': o.user ? o.user.username() : 'Loading...' }, avatar(o.user, { className: 'avatar', onclick: this.insertReference.bind(this, o.user) })), m('span', { className: 'message' }, o.message), m('div', { className: 'clear' })]);
+                            return m('div', { className: 'message-wrapper' }, [m('span', { className: 'avatar-wrapper', 'data-name': o.user ? o.user.username() : 'Loading...' }, avatar(o.user, { className: 'avatar', onclick: this.insertReference.bind(this, o.user) })), m('span', { className: 'message', 'data-message': o.message, config: this.parseMessage.bind(this) }), m('div', { className: 'clear' })]);
                         }.bind(this))]), m('input', {
                             type: 'text',
                             id: 'chat-input',
