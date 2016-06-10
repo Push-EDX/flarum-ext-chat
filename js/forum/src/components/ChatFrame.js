@@ -379,7 +379,7 @@ export class ChatFrame extends Component {
 
         // Notify (if we are not the author!)
         if ((typeof notify === "undefined" || notify) &&
-            user.id() != app.session.user.id()) {
+            user && user.id() != app.session.user.id()) {
             this.notify(msg);
         }
 

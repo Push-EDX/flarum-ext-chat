@@ -351,7 +351,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         m.redraw();
 
                         // Notify (if we are not the author!)
-                        if ((typeof notify === "undefined" || notify) && user.id() != app.session.user.id()) {
+                        if ((typeof notify === "undefined" || notify) && user && user.id() != app.session.user.id()) {
                             this.notify(msg);
                         }
 
