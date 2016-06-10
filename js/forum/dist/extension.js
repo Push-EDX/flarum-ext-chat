@@ -138,8 +138,6 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 }, {
                     key: 'scroll',
                     value: function scroll(e) {
-                        m.redraw.strategy('none');
-
                         if (this.status.autoScroll) {
                             e.scrollTop = e.scrollHeight;
                         } else {
@@ -150,6 +148,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
 
                         this.status.autoScroll = e.scrollTop + e.offsetHeight >= e.scrollHeight;
                         this.status.oldScroll = e.scrollTop;
+                        this.wrapper = e;
                     }
                 }, {
                     key: 'disableAutoScroll',
@@ -216,10 +215,17 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         return this.status.oldReached;
                     }
                 }, {
+                    key: 'refocus',
+                    value: function refocus(e) {
+                        this.input = e;
+                        if ((this.status.hadFocus || this.status.loading) && e != document.activeElement) {
+                            e.focus();
+                            this.status.hadFocus = false;
+                        }
+                    }
+                }, {
                     key: 'view',
                     value: function view() {
-                        var _this2 = this;
-
                         return m('div', { className: 'chat left container ' + (this.status.beingShown ? '' : 'hidden') }, [m('div', {
                             tabindex: 0,
                             className: 'frame',
@@ -255,9 +261,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             placeholder: app.forum.attribute('canPostChat') ? '' : 'Solo los usuarios registrados pueden usar el chat',
                             onkeyup: this.process.bind(this),
                             onkeydown: this.checkLimit.bind(this),
-                            config: function config(e) {
-                                return _this2.status.loading && e != document.activeElement && e.focus();
-                            }
+                            config: this.refocus.bind(this)
                         }), m('span', {
                             id: 'chat-limitter',
                             className: this.reachedLimit() ? 'reaching-limit' : ''
@@ -281,7 +285,6 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             this.status.loading = true;
                             this.status.oldlength = 0;
                             e.target.value = '';
-                            m.redraw();
 
                             app.request({
                                 method: 'POST',
@@ -293,8 +296,6 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             }).then(this.success.bind(this), this.failure.bind(this));
                         } else if (!this.status.oldReached) {
                             m.redraw.strategy('none');
-                        } else {
-                            //m.redraw();
                         }
                     }
                 }, {
@@ -346,6 +347,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         this.status.loading = false;
 
                         // Redraw now
+                        this.status.hadFocus = document.activeElement === this.input;
                         m.redraw();
 
                         // Notify (if we are not the author!)

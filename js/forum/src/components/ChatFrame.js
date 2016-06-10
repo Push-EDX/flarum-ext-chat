@@ -131,8 +131,6 @@ export class ChatFrame extends Component {
     }
 
     scroll(e) {
-        m.redraw.strategy('none');
-
         if (this.status.autoScroll) {
             e.scrollTop = e.scrollHeight;
         } else {
@@ -144,6 +142,7 @@ export class ChatFrame extends Component {
 
         this.status.autoScroll = (e.scrollTop + e.offsetHeight >= e.scrollHeight);
         this.status.oldScroll = e.scrollTop;
+        this.wrapper = e;
     }
 
     disableAutoScroll(e) {
@@ -202,6 +201,15 @@ export class ChatFrame extends Component {
     reachedLimit() {
         this.status.oldReached = (maxLength - (this.status.oldlength || 0)) < 100;
         return this.status.oldReached;
+    }
+
+    refocus(e) {
+        this.input = e;
+        if ((this.status.hadFocus || this.status.loading) && e != document.activeElement)
+        {
+            e.focus();
+            this.status.hadFocus = false;
+        }
     }
 
     /**
@@ -265,7 +273,7 @@ export class ChatFrame extends Component {
                         placeholder: app.forum.attribute('canPostChat') ? '' : 'Solo los usuarios registrados pueden usar el chat',
                         onkeyup: this.process.bind(this),
                         onkeydown: this.checkLimit.bind(this),
-                        config: (e) => this.status.loading && e != document.activeElement && e.focus()
+                        config: this.refocus.bind(this)
                     }),
                     m('span', {
                         id: 'chat-limitter',
@@ -296,7 +304,6 @@ export class ChatFrame extends Component {
             this.status.loading = true;
             this.status.oldlength = 0;
             e.target.value = '';
-            m.redraw();
 
             app.request({
                 method: 'POST',
@@ -367,6 +374,7 @@ export class ChatFrame extends Component {
         this.status.loading = false;
 
         // Redraw now
+        this.status.hadFocus = document.activeElement === this.input;
         m.redraw();
 
         // Notify (if we are not the author!)
