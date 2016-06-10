@@ -466,12 +466,16 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
 
                     // Just loaded? Fetch last 10 messages
                     if (status.messages.length == 0) {
+                        var data = new FormData();
+                        data.append('id', -1);
+
                         app.request({
                             method: 'POST',
                             url: app.forum.attribute('apiUrl') + '/chat/fetch',
                             serialize: function serialize(raw) {
                                 return raw;
-                            }
+                            },
+                            data: data
                         }).then(function (response) {
                             for (var i = 0; i < response.data.attributes.messages.length; ++i) {
                                 forwardMessage(response.data.attributes.messages[i], false);

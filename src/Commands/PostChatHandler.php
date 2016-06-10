@@ -96,7 +96,9 @@ class PostChatHandler
             'message' => $command->msg
         ];
 
-        FetchChatController::UpdateMessages($msg);
+        $id = FetchChatController::UpdateMessages($msg);
+        $msg['id'] = $id;
+
         $pusher = $this->getPusher();
         $pusher->trigger('public', 'newChat', $msg);
 

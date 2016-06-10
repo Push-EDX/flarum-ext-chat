@@ -23,7 +23,7 @@ class FetchChat
      */
     public $msgs;
 
-    public $id = "asd";
+    public $id = "FetchChat";
 
     /**
      * @var string

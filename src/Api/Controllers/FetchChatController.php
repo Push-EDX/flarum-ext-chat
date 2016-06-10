@@ -54,10 +54,19 @@ class FetchChatController extends AbstractResourceController
         return $db;
     }
 
-    static public function GetMessages($db)
+    static public function GetMessages($db, $id)
     {
-        $stmt = $db->prepare('SELECT actorId, message FROM posts ORDER BY id DESC LIMIT 20;');
-        $result = $stmt->execute();
+        if ($id == -1)
+        {
+            $stmt = $db->prepare('SELECT id, actorId, message FROM posts ORDER BY id DESC LIMIT 20;');
+            $result = $stmt->execute();
+        }
+        else
+        {
+            $stmt = $db->prepare('SELECT id, actorId, message FROM posts WHERE id < :id ORDER BY id DESC LIMIT 20;');
+            $result = $stmt->execute(['id' => $id]);
+        }
+
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
 
         $msgs = new \stdClass();
@@ -73,8 +82,14 @@ class FetchChatController extends AbstractResourceController
     static public function UpdateMessages($msg)
     {
         $db = FetchChatController::GetDB();
+
+        $db->beginTransaction();
         $stmt = $db->prepare('INSERT INTO posts (actorId, message) VALUES (?, ?);');
         $stmt->execute([$msg['actorId'], $msg['message']]);
+        $id = $db->lastInsertId();
+        $db->commit();
+
+        return $id;
     }
 
     /**
@@ -86,7 +101,8 @@ class FetchChatController extends AbstractResourceController
      */
     protected function data(ServerRequestInterface $request, Document $document)
     {
-        $msgs = FetchChatController::GetMessages(FetchChatController::GetDB());
+        $id = $request->getParsedBody()['id'];
+        $msgs = FetchChatController::GetMessages(FetchChatController::GetDB(), $id);
 
         return $this->bus->dispatch(
             new FetchChat($msgs)
