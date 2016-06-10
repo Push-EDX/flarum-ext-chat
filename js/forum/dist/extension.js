@@ -13,7 +13,8 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
             avatar = _flarumHelpersAvatar.default;
         }],
         execute: function () {
-            function ChatMessage(user, message) {
+            function ChatMessage(id, user, message) {
+                this.id = id;
                 this.user = user;
                 this.message = message;
             }
@@ -138,12 +139,18 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 }, {
                     key: 'scroll',
                     value: function scroll(e) {
+                        if (this.status.oldScroll < 0 && this.status.loadingOld) {
+                            return;
+                        }
+
                         if (this.status.autoScroll) {
                             e.scrollTop = e.scrollHeight;
-                        } else {
+                        } else if (this.status.oldScroll >= 0) {
                             if (!this.status.dragFlagged && Math.abs(e.scrollTop - this.status.oldScroll) > 1) {
                                 e.scrollTop = this.status.oldScroll;
                             }
+                        } else {
+                            e.scrollTop = e.scrollHeight + this.status.oldScroll - 30;
                         }
 
                         this.status.autoScroll = e.scrollTop + e.offsetHeight >= e.scrollHeight;
@@ -153,11 +160,48 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 }, {
                     key: 'disableAutoScroll',
                     value: function disableAutoScroll(e) {
-                        m.redraw.strategy('none');
-
                         var el = e.target;
                         this.status.autoScroll = false;
-                        this.status.oldScroll = el.scrollTop;
+                        var currentHeight = el.scrollHeight;
+
+                        // Load older messages
+                        if (el.scrollTop <= 0 && this.status.oldScroll > 0 && !this.status.loadingOld) {
+                            this.status.loadingOld = true;
+                            this.status.oldScroll = -currentHeight;
+                            m.redraw();
+
+                            var data = new FormData();
+                            data.append('id', this.status.messages[0].id);
+
+                            app.request({
+                                method: 'POST',
+                                url: app.forum.attribute('apiUrl') + '/chat/fetch',
+                                serialize: function serialize(raw) {
+                                    return raw;
+                                },
+                                data: data
+                            }).then(function (response) {
+                                this.status.loadingOld = false;
+                                this.status.autoScroll = false;
+
+                                var oldMissages = this.status.messages;
+                                this.status._messages = [];
+
+                                for (var i = 0; i < response.data.attributes.messages.length; ++i) {
+                                    this.forwardMessage(response.data.attributes.messages[i], false, false);
+                                }
+
+                                // Add old messages and redraw
+                                this.status._messages = this.status._messages.concat(oldMissages);
+                                m.redraw();
+                            }.bind(this), function () {
+                                this.status.loadingOld = false;
+                                m.redraw();
+                            }.bind(this));
+                        } else {
+                            m.redraw.strategy('none');
+                            this.status.oldScroll = el.scrollTop;
+                        }
                     }
                 }, {
                     key: 'toggle',
@@ -250,7 +294,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             className: 'wrapper',
                             config: this.scroll.bind(this),
                             onscroll: this.disableAutoScroll.bind(this)
-                        }, [this.status.messages.map(function (o) {
+                        }, [this.status.loadingOld ? m('div', { className: 'message-wrapper' }, [m('span', { className: 'message' }, LoadingIndicator.component({ className: 'loading-old Button-icon' })), m('div', { className: 'clear' })]) : undefined, this.status.messages.map(function (o) {
                             return m('div', { className: 'message-wrapper' }, [m('span', { className: 'avatar-wrapper', 'data-name': o.user ? o.user.username() : 'Loading...' }, avatar(o.user, { className: 'avatar', onclick: this.insertReference.bind(this, o.user) })), m('span', { className: 'message' }, o.message), m('div', { className: 'clear' })]);
                         }.bind(this))]), m('input', {
                             type: 'text',
@@ -337,18 +381,33 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         m.redraw();
                     }
                 }, {
+                    key: 'forwardMessage',
+                    value: function forwardMessage(message, notify, redraw) {
+                        var user = app.store.getById('users', message.actorId);
+                        var obj = this.addMessage(message.id, message.message, user, notify, redraw);
+
+                        if (user == undefined) {
+                            app.store.find('users', message.actorId).then(function (user) {
+                                obj.user = user;
+                                m.redraw();
+                            });
+                        }
+                    }
+                }, {
                     key: 'addMessage',
-                    value: function addMessage(msg, user, notify) {
+                    value: function addMessage(id, msg, user, notify, redraw) {
                         // Do note "messages" is a "set", thus = is a function
-                        var obj = new ChatMessage(user, msg);
+                        var obj = new ChatMessage(id, user, msg);
                         this.status.messages = obj;
 
                         // End loading
                         this.status.loading = false;
 
                         // Redraw now
-                        this.status.hadFocus = document.activeElement === this.input;
-                        m.redraw();
+                        if (typeof redraw === "undefined" || redraw) {
+                            this.status.hadFocus = document.activeElement === this.input;
+                            m.redraw();
+                        }
 
                         // Notify (if we are not the author!)
                         if ((typeof notify === "undefined" || notify) && user && user.id() != app.session.user.id()) {
@@ -439,24 +498,12 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                     }
                 };
 
-                function forwardMessage(message, notify) {
-                    var user = app.store.getById('users', message.actorId);
-                    var obj = status.callback(message.message, user, notify);
-
-                    if (user == undefined) {
-                        app.store.find('users', message.actorId).then(function (user) {
-                            obj.user = user;
-                            m.redraw();
-                        });
-                    }
-                }
-
                 extend(HeaderPrimary.prototype, 'config', function (x, isInitialized, context) {
                     if (isInitialized) return;
 
                     app.pusher.then(function (channels) {
                         channels.main.bind('newChat', function (data) {
-                            forwardMessage(data);
+                            status.forwardMessage(data);
                         });
 
                         extend(context, 'onunload', function () {
@@ -478,7 +525,7 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                             data: data
                         }).then(function (response) {
                             for (var i = 0; i < response.data.attributes.messages.length; ++i) {
-                                forwardMessage(response.data.attributes.messages[i], false);
+                                status.forwardMessage(response.data.attributes.messages[i], false);
                             }
                         }, function (response) {});
                     }
@@ -494,7 +541,7 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                         return realView.call(chatFrame);
                     };
                     chatFrame.status = status;
-                    status.callback = chatFrame.addMessage.bind(chatFrame);
+                    status.forwardMessage = chatFrame.forwardMessage.bind(chatFrame);
                     items.add('pushedx-chat-frame', chatFrame);
                 });
             });

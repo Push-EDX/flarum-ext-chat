@@ -3,7 +3,8 @@ import icon from 'flarum/helpers/icon';
 import LoadingIndicator from 'flarum/components/LoadingIndicator';
 import avatar from 'flarum/helpers/avatar';
 
-export function ChatMessage(user, message) {
+export function ChatMessage(id, user, message) {
+    this.id = id;
     this.user = user;
     this.message = message;
 }
@@ -131,13 +132,19 @@ export class ChatFrame extends Component {
     }
 
     scroll(e) {
+        if (this.status.oldScroll < 0 && this.status.loadingOld) {
+            return;
+        }
+
         if (this.status.autoScroll) {
             e.scrollTop = e.scrollHeight;
-        } else {
+        } else if (this.status.oldScroll >= 0) {
             if (!this.status.dragFlagged &&
                 Math.abs(e.scrollTop - this.status.oldScroll) > 1) {
                 e.scrollTop = this.status.oldScroll;
             }
+        } else {
+            e.scrollTop = e.scrollHeight + this.status.oldScroll - 30;
         }
 
         this.status.autoScroll = (e.scrollTop + e.offsetHeight >= e.scrollHeight);
@@ -146,11 +153,50 @@ export class ChatFrame extends Component {
     }
 
     disableAutoScroll(e) {
-        m.redraw.strategy('none');
-
         let el = e.target;
         this.status.autoScroll = false;
-        this.status.oldScroll = el.scrollTop;
+        let currentHeight = el.scrollHeight;
+
+        // Load older messages
+        if (el.scrollTop <= 0 && this.status.oldScroll > 0 && !this.status.loadingOld) {
+            this.status.loadingOld = true;
+            this.status.oldScroll = -currentHeight;
+            m.redraw();
+
+            const data = new FormData();
+            data.append('id', this.status.messages[0].id);
+
+            app.request({
+                method: 'POST',
+                url: app.forum.attribute('apiUrl') + '/chat/fetch',
+                serialize: raw => raw,
+                data
+            }).then(
+                (function (response){
+                    this.status.loadingOld = false;
+                    this.status.autoScroll = false;
+
+                    let oldMissages = this.status.messages;
+                    this.status._messages = [];
+
+                    for (var i = 0; i < response.data.attributes.messages.length; ++i) {
+                        this.forwardMessage(response.data.attributes.messages[i], false, false);
+                    }
+
+                    // Add old messages and redraw
+                    this.status._messages = this.status._messages.concat(oldMissages);
+                    m.redraw();
+                }).bind(this),
+                (function (){
+                    this.status.loadingOld = false;
+                    m.redraw();
+                }).bind(this)
+            );
+        }
+        else {
+            m.redraw.strategy('none');
+            this.status.oldScroll = el.scrollTop;
+        }
     }
 
     toggle(e) {
@@ -255,6 +301,11 @@ export class ChatFrame extends Component {
                         config: this.scroll.bind(this),
                         onscroll: this.disableAutoScroll.bind(this)
                     }, [
+                        this.status.loadingOld ? (
+                            m('div', {className: 'message-wrapper'}, [
+                                m('span', {className: 'message'}, LoadingIndicator.component({className: 'loading-old Button-icon'})),
+                                m('div', {className: 'clear'})])
+                        ) : undefined,
                         this.status.messages.map((function(o) {
                             return m('div', {className: 'message-wrapper'}, [
                                 m('span', {className: 'avatar-wrapper', 'data-name': o.user ? o.user.username() : 'Loading...'},
@@ -365,17 +416,32 @@ export class ChatFrame extends Component {
         m.redraw();
     }
 
-    addMessage(msg, user, notify) {
+    forwardMessage(message, notify, redraw) {
+        var user = app.store.getById('users', message.actorId);
+        var obj = this.addMessage(message.id, message.message, user, notify, redraw);
+
+        if (user == undefined)
+        {
+            app.store.find('users', message.actorId).then(function(user){
+                obj.user = user;
+                m.redraw();
+            });
+        }
+    }
+
+    addMessage(id, msg, user, notify, redraw) {
         // Do note "messages" is a "set", thus = is a function
-        var obj = new ChatMessage(user, msg);
+        var obj = new ChatMessage(id, user, msg);
         this.status.messages = obj;
 
         // End loading
         this.status.loading = false;
 
         // Redraw now
-        this.status.hadFocus = document.activeElement === this.input;
-        m.redraw();
+        if (typeof redraw === "undefined"  || redraw) {
+            this.status.hadFocus = document.activeElement === this.input;
+            m.redraw();
+        }
 
         // Notify (if we are not the author!)
         if ((typeof notify === "undefined" || notify) &&

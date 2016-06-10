@@ -30,25 +30,12 @@ app.initializers.add('pushedx-realtime-chat', app => {
         }
     };
 
-    function forwardMessage(message, notify) {
-        var user = app.store.getById('users', message.actorId);
-        var obj = status.callback(message.message, user, notify);
-
-        if (user == undefined)
-        {
-            app.store.find('users', message.actorId).then(function(user){
-                obj.user = user;
-                m.redraw();
-            });
-        }
-    }
-
     extend(HeaderPrimary.prototype, 'config', function(x, isInitialized, context) {
         if (isInitialized) return;
 
         app.pusher.then(channels => {
             channels.main.bind('newChat', data => {
-                forwardMessage(data);
+                status.forwardMessage(data);
             });
 
             extend(context, 'onunload', () => channels.main.unbind('newChat'));
@@ -68,7 +55,7 @@ app.initializers.add('pushedx-realtime-chat', app => {
             }).then(
                 function (response) {
                     for (var i = 0; i < response.data.attributes.messages.length; ++i) {
-                        forwardMessage(response.data.attributes.messages[i], false);
+                        status.forwardMessage(response.data.attributes.messages[i], false);
                     }
                 },
                 function (response) {
@@ -88,7 +75,7 @@ app.initializers.add('pushedx-realtime-chat', app => {
             return realView.call(chatFrame);
         };
         chatFrame.status = status;
-        status.callback = chatFrame.addMessage.bind(chatFrame);
+        status.forwardMessage = chatFrame.forwardMessage.bind(chatFrame);
         items.add('pushedx-chat-frame', chatFrame);
     });
 });
