@@ -48,6 +48,15 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                 }
 
                 babelHelpers.createClass(ChatFrame, [{
+                    key: 'controller',
+                    value: function controller() {
+                        return {
+                            loading: false,
+                            autoScroll: true,
+                            oldScroll: 0
+                        };
+                    }
+                }, {
                     key: 'init',
                     value: function init() {
                         this.status = null;
@@ -143,6 +152,11 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             return;
                         }
 
+                        console.log('scroll:');
+                        console.log('AutoScroll: ' + this.status.autoScroll);
+                        console.log('OldScroll: ' + this.status.oldScroll);
+                        console.log('');
+
                         if (this.status.autoScroll) {
                             e.scrollTop = e.scrollHeight;
                         } else if (this.status.oldScroll >= 0) {
@@ -163,6 +177,11 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         var el = e.target;
                         this.status.autoScroll = e.scrollTop + e.offsetHeight >= e.scrollHeight;
                         var currentHeight = el.scrollHeight;
+
+                        console.log('disableAutoScroll:');
+                        console.log('AutoScroll: ' + this.status.autoScroll);
+                        console.log('OldScroll: ' + this.status.oldScroll);
+                        console.log('');
 
                         // Load older messages
                         if (el.scrollTop <= 0 && this.status.oldScroll > 0 && !this.status.loadingOld) {
@@ -334,6 +353,8 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             this.status.loading = true;
                             this.status.oldlength = 0;
                             e.target.value = '';
+
+                            this.forwardMessage({ message: msg, actorId: app.session.user.id(), id: +new Date() }, false, true);
 
                             app.request({
                                 method: 'POST',
@@ -542,9 +563,11 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                 extend(HeaderPrimary.prototype, 'items', function (items) {
                     var chatFrame = new ChatFrame();
                     var realView = chatFrame.view;
-                    chatFrame.view = function () {
+                    /*
+                    chatFrame.view = () => {
                         return realView.call(chatFrame);
                     };
+                    */
                     chatFrame.status = status;
                     status.forwardMessage = chatFrame.forwardMessage.bind(chatFrame);
                     items.add('pushedx-chat-frame', chatFrame);

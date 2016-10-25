@@ -13,7 +13,7 @@
 namespace PushEDX\Chat\Listeners;
 
 use DirectoryIterator;
-use Flarum\Event\ConfigureClientView;
+use Flarum\Event\ConfigureWebApp;
 use Flarum\Event\ConfigureLocales;
 use Illuminate\Contracts\Events\Dispatcher;
 
@@ -27,17 +27,17 @@ class AddClientAssets
     */
     public function subscribe(Dispatcher $events)
     {
-        $events->listen(ConfigureClientView::class, [$this, 'addForumAssets']);
-        $events->listen(ConfigureClientView::class, [$this, 'addAdminAssets']);
+        $events->listen(ConfigureWebApp::class, [$this, 'addForumAssets']);
+        $events->listen(ConfigureWebApp::class, [$this, 'addAdminAssets']);
         //$events->listen(ConfigureLocales::class, [$this, 'addLocales']);
     }
 
     /**
     * Modifies the client view for the Forum.
     *
-    * @param ConfigureClientView $event
+    * @param ConfigureWebApp $event
     */
-    public function addForumAssets(ConfigureClientView $event)
+    public function addForumAssets(ConfigureWebApp $event)
     {
         if ($event->isForum()) {
             $event->addAssets([
@@ -51,9 +51,9 @@ class AddClientAssets
     /**
     * Modifies the client view for the Admin.
     *
-    * @param ConfigureClientView $event
+    * @param ConfigureWebApp $event
     */
-    public function addAdminAssets(ConfigureClientView $event)
+    public function addAdminAssets(ConfigureWebApp $event)
     {
         if ($event->isAdmin()) {
             $event->addAssets([

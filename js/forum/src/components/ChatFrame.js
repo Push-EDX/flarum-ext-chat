@@ -29,6 +29,14 @@ const maxLength = 512;
 
 export class ChatFrame extends Component {
 
+    controller() {
+        return {
+            loading: false,
+            autoScroll: true,
+            oldScroll: 0,
+        }
+    }
+
     /**
      * Load the configured remote uploader service.
      */
@@ -136,6 +144,11 @@ export class ChatFrame extends Component {
             return;
         }
 
+        console.log('scroll:');
+        console.log('AutoScroll: ' + this.status.autoScroll);
+        console.log('OldScroll: ' + this.status.oldScroll);
+        console.log('');
+
         if (this.status.autoScroll) {
             e.scrollTop = e.scrollHeight;
         } else if (this.status.oldScroll >= 0) {
@@ -156,6 +169,11 @@ export class ChatFrame extends Component {
         let el = e.target;
         this.status.autoScroll = (e.scrollTop + e.offsetHeight >= e.scrollHeight);
         let currentHeight = el.scrollHeight;
+
+        console.log('disableAutoScroll:');
+        console.log('AutoScroll: ' + this.status.autoScroll);
+        console.log('OldScroll: ' + this.status.oldScroll);
+        console.log('');
 
         // Load older messages
         if (el.scrollTop <= 0 && this.status.oldScroll > 0 && !this.status.loadingOld) {
@@ -359,6 +377,8 @@ export class ChatFrame extends Component {
             this.status.loading = true;
             this.status.oldlength = 0;
             e.target.value = '';
+
+            this.forwardMessage({message: msg, actorId: app.session.user.id(), id: +new Date()}, false, true);
 
             app.request({
                 method: 'POST',

@@ -71,9 +71,11 @@ app.initializers.add('pushedx-realtime-chat', app => {
     extend(HeaderPrimary.prototype, 'items', function(items) {
         var chatFrame = new ChatFrame;
         var realView = chatFrame.view;
+        /*
         chatFrame.view = () => {
             return realView.call(chatFrame);
         };
+        */
         chatFrame.status = status;
         status.forwardMessage = chatFrame.forwardMessage.bind(chatFrame);
         items.add('pushedx-chat-frame', chatFrame);
