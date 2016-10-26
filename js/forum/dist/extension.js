@@ -1,7 +1,7 @@
 'use strict';
 
 System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component', 'flarum/helpers/icon', 'flarum/components/LoadingIndicator', 'flarum/helpers/avatar'], function (_export, _context) {
-    var Component, icon, LoadingIndicator, avatar, refAudioNotification, refAudio, audioNotification, audio, soundNormal, soundMuted, notifyNormal, notifyDisabled, maxLength, ChatFrame;
+    var Component, icon, LoadingIndicator, avatar, refAudioNotification, refAudio, audioNotification, audio, soundNormal, soundMuted, notifyNormal, notifyDisabled, maxLength, messages, scrollInfo, ChatFrame;
     return {
         setters: [function (_flarumComponent) {
             Component = _flarumComponent.default;
@@ -38,6 +38,12 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
             notifyNormal = 'data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDU4IDU4IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1OCA1ODsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxwYXRoIHN0eWxlPSJmaWxsOiM4Mzk1OTQ7IiBkPSJNNiwyM2gyNy40NzRDMzIuNTM3LDI0Ljc5NiwzMiwyNi44MzQsMzIsMjlzMC41MzcsNC4yMDQsMS40NzQsNkg2Yy0zLjMxNCwwLTYtMi42ODYtNi02ICBDMCwyNS42ODYsMi42ODYsMjMsNiwyM3oiLz4KPGNpcmNsZSBzdHlsZT0iZmlsbDojNjFCODcyOyIgY3g9IjQ1IiBjeT0iMjkiIHI9IjEzIi8+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=';
             notifyDisabled = 'data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDU4IDU4IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1OCA1ODsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxwYXRoIHN0eWxlPSJmaWxsOiM4Mzk1OTQ7IiBkPSJNNTIsMjNIMjQuNTI2QzI1LjQ2MywyNC43OTYsMjYsMjYuODM0LDI2LDI5cy0wLjUzNyw0LjIwNC0xLjQ3NCw2SDUyYzMuMzE0LDAsNi0yLjY4Niw2LTYgIFM1NS4zMTQsMjMsNTIsMjN6Ii8+CjxjaXJjbGUgc3R5bGU9ImZpbGw6I0M3Q0FDNzsiIGN4PSIxMyIgY3k9IjI5IiByPSIxMyIvPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8L3N2Zz4K';
             maxLength = 512;
+            messages = [];
+            scrollInfo = {
+                autoScroll: true,
+                oldScroll: 0,
+                loadingOld: false
+            };
 
             _export('ChatFrame', ChatFrame = function (_Component) {
                 babelHelpers.inherits(ChatFrame, _Component);
@@ -49,17 +55,28 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
 
                 babelHelpers.createClass(ChatFrame, [{
                     key: 'controller',
-                    value: function controller() {
+                    value: function controller(data, b, c) {
+                        var showStatus = localStorage.getItem('beingShown');
+                        var isMuted = localStorage.getItem('isMuted');
+                        var notify = localStorage.getItem('notify');
+
                         return {
                             loading: false,
-                            autoScroll: true,
-                            oldScroll: 0
+                            hadFocus: false,
+                            downAt: [0, 0],
+                            lastClick: 0,
+                            scrollInfo: scrollInfo,
+                            oldlength: 0,
+                            beingShown: showStatus === null ? true : JSON.parse(showStatus),
+                            isMuted: isMuted === null ? true : JSON.parse(isMuted),
+                            notify: notify === null ? false : JSON.parse(notify),
+
+                            messages: messages
                         };
                     }
                 }, {
                     key: 'init',
                     value: function init() {
-                        this.status = null;
                         this.chat = null;
                         this.input = null;
                     }
@@ -85,146 +102,8 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         return this.input;
                     }
                 }, {
-                    key: 'focusIn',
-                    value: function focusIn(e) {
-                        // Get the chat div from the event target
-                        var chat = this.getChat(e.target);
-                        if (chat.className.indexOf('active') < 0) {
-                            chat.className = "frame active";
-                        } else {
-                            m.redraw.strategy('none');
-                        }
-                    }
-                }, {
-                    key: 'focusInput',
-                    value: function focusInput(e) {
-                        // Skip if it was a drag
-                        if (this.status.dragFlagged) {
-                            m.redraw.strategy('none');
-                            this.status.dragFlagged = false;
-                            return;
-                        }
-
-                        // Get the chat div from the event target
-                        var chat = this.getChat(e.target);
-
-                        // Find the input element
-                        var input = this.getInput(chat);
-
-                        // Skip if already in
-                        if (e.target == input) {
-                            m.redraw.strategy('none');
-                            return;
-                        }
-
-                        // Focus it
-                        input.focus();
-                    }
-                }, {
-                    key: 'focusOut',
-                    value: function focusOut(e) {
-                        // Get the chat div from the event target
-                        var chat = this.getChat(e.target);
-                        chat.className = "frame";
-                    }
-                }, {
-                    key: 'flagDrag',
-                    value: function flagDrag(e) {
-                        m.redraw.strategy('none');
-                        this.status.dragFlagged = (e.movementX != 0 || e.movementY != 0) && this.status.downFlagged;
-                    }
-                }, {
-                    key: 'flagDown',
-                    value: function flagDown(e) {
-                        m.redraw.strategy('none');
-                        this.status.downFlagged = true;
-                    }
-                }, {
-                    key: 'flagUp',
-                    value: function flagUp(e) {
-                        m.redraw.strategy('none');
-                        this.status.downFlagged = false;
-                    }
-                }, {
-                    key: 'scroll',
-                    value: function scroll(e) {
-                        if (this.status.oldScroll < 0 && this.status.loadingOld) {
-                            return;
-                        }
-
-                        console.log('scroll:');
-                        console.log('AutoScroll: ' + this.status.autoScroll);
-                        console.log('OldScroll: ' + this.status.oldScroll);
-                        console.log('');
-
-                        if (this.status.autoScroll) {
-                            e.scrollTop = e.scrollHeight;
-                        } else if (this.status.oldScroll >= 0) {
-                            if (!this.status.dragFlagged && Math.abs(e.scrollTop - this.status.oldScroll) > 1) {
-                                e.scrollTop = this.status.oldScroll;
-                            }
-                        } else {
-                            e.scrollTop = e.scrollHeight + this.status.oldScroll - 30;
-                        }
-
-                        this.status.autoScroll = this.status.autoScroll || e.scrollTop + e.offsetHeight >= e.scrollHeight;
-                        this.status.oldScroll = e.scrollTop;
-                        this.wrapper = e;
-                    }
-                }, {
-                    key: 'disableAutoScroll',
-                    value: function disableAutoScroll(e) {
-                        var el = e.target;
-                        this.status.autoScroll = e.scrollTop + e.offsetHeight >= e.scrollHeight;
-                        var currentHeight = el.scrollHeight;
-
-                        console.log('disableAutoScroll:');
-                        console.log('AutoScroll: ' + this.status.autoScroll);
-                        console.log('OldScroll: ' + this.status.oldScroll);
-                        console.log('');
-
-                        // Load older messages
-                        if (el.scrollTop <= 0 && this.status.oldScroll > 0 && !this.status.loadingOld) {
-                            this.status.loadingOld = true;
-                            this.status.oldScroll = -currentHeight;
-                            m.redraw();
-
-                            var data = new FormData();
-                            data.append('id', this.status.messages[0].id);
-
-                            app.request({
-                                method: 'POST',
-                                url: app.forum.attribute('apiUrl') + '/chat/fetch',
-                                serialize: function serialize(raw) {
-                                    return raw;
-                                },
-                                data: data
-                            }).then(function (response) {
-                                this.status.loadingOld = false;
-                                this.status.autoScroll = false;
-
-                                var oldMissages = this.status.messages;
-                                this.status._messages = [];
-
-                                for (var i = 0; i < response.data.attributes.messages.length; ++i) {
-                                    this.forwardMessage(response.data.attributes.messages[i], false, false);
-                                }
-
-                                // Add old messages and redraw
-                                this.status._messages = this.status._messages.concat(oldMissages);
-                                m.redraw();
-                            }.bind(this), function () {
-                                this.status.loadingOld = false;
-                                m.redraw();
-                            }.bind(this));
-                        } else {
-                            m.redraw.strategy('none');
-                            this.status.oldScroll = el.scrollTop;
-                        }
-                    }
-                }, {
                     key: 'toggle',
-                    value: function toggle(e) {
+                    value: function toggle(ctrl, e) {
                         var chat = this.getChat(e.target).parentNode;
                         var classes = chat.className;
                         var showing = false;
@@ -237,23 +116,23 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         }
 
                         chat.className = classes;
-                        this.status.beingShown = showing;
+                        ctrl.beingShown = showing;
                         localStorage.setItem('beingShown', JSON.stringify(showing));
                     }
                 }, {
                     key: 'toggleSound',
-                    value: function toggleSound(e) {
-                        this.status.isMuted = !this.status.isMuted;
-                        localStorage.setItem('isMuted', JSON.stringify(this.status.isMuted));
+                    value: function toggleSound(ctrl, e) {
+                        ctrl.isMuted = !ctrl.isMuted;
+                        localStorage.setItem('isMuted', JSON.stringify(ctrl.isMuted));
 
                         e.preventDefault();
                         e.stopPropagation();
                     }
                 }, {
                     key: 'toggleNotifications',
-                    value: function toggleNotifications(e) {
-                        this.status.notify = !this.status.notify;
-                        localStorage.setItem('notify', JSON.stringify(this.status.notify));
+                    value: function toggleNotifications(ctrl, e) {
+                        ctrl.notify = !ctrl.notify;
+                        localStorage.setItem('notify', JSON.stringify(ctrl.notify));
 
                         e.preventDefault();
                         e.stopPropagation();
@@ -273,17 +152,17 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                     }
                 }, {
                     key: 'reachedLimit',
-                    value: function reachedLimit() {
-                        this.status.oldReached = maxLength - (this.status.oldlength || 0) < 100;
-                        return this.status.oldReached;
+                    value: function reachedLimit(ctrl) {
+                        ctrl.oldReached = maxLength - (ctrl.oldlength || 0) < 100;
+                        return ctrl.oldReached;
                     }
                 }, {
                     key: 'refocus',
-                    value: function refocus(e) {
+                    value: function refocus(ctrl, e) {
                         this.input = e;
-                        if ((this.status.hadFocus || this.status.loading) && e != document.activeElement) {
+                        if ((ctrl.hadFocus || ctrl.loading) && e != document.activeElement) {
                             e.focus();
-                            this.status.hadFocus = false;
+                            ctrl.hadFocus = false;
                         }
                     }
                 }, {
@@ -292,55 +171,147 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                         s9e.TextFormatter.preview(e.dataset.message, e);
                     }
                 }, {
+                    key: 'scroll',
+                    value: function scroll(ctrl, e) {
+                        if (ctrl.scrollInfo.autoScroll) {
+                            e.scrollTop = e.scrollHeight;
+                        } else if (ctrl.scrollInfo.oldScroll >= 0) {
+                            e.scrollTop = ctrl.scrollInfo.oldScroll;
+                        } else {
+                            e.scrollTop = e.scrollHeight + ctrl.scrollInfo.oldScroll - 30;
+                        }
+                    }
+                }, {
+                    key: 'disableAutoScroll',
+                    value: function disableAutoScroll(ctrl, e) {
+                        var el = e.target;
+                        ctrl.scrollInfo.autoScroll = el.scrollTop + el.offsetHeight >= el.scrollHeight;
+                        var currentHeight = el.scrollHeight;
+
+                        // Load older messages
+                        if (el.scrollTop <= 0 && ctrl.scrollInfo.oldScroll > 0 && !ctrl.scrollInfo.loadingOld) {
+                            ctrl.scrollInfo.loadingOld = true;
+                            ctrl.scrollInfo.oldScroll = -currentHeight;
+                            m.redraw();
+
+                            var data = new FormData();
+                            data.append('id', ctrl.messages[0].id);
+
+                            app.request({
+                                method: 'POST',
+                                url: app.forum.attribute('apiUrl') + '/chat/fetch',
+                                serialize: function serialize(raw) {
+                                    return raw;
+                                },
+                                data: data
+                            }).then(function (response) {
+                                ctrl.scrollInfo.loadingOld = false;
+                                ctrl.scrollInfo.autoScroll = false;
+
+                                var oldMissages = messages;
+                                messages = [];
+                                ctrl.messages = messages;
+
+                                for (var i = 0; i < response.data.attributes.messages.length; ++i) {
+                                    this.forwardMessage(ctrl, response.data.attributes.messages[i], false, false);
+                                }
+
+                                // Add old messages and redraw
+                                messages = messages.concat(oldMissages);
+                                ctrl.messages = messages;
+                                m.redraw();
+                            }.bind(this), function () {
+                                ctrl.scrollInfo.loadingOld = false;
+                                m.redraw();
+                            }.bind(this));
+                        } else {
+                            m.redraw.strategy('none');
+                            ctrl.scrollInfo.oldScroll = el.scrollTop;
+                        }
+                    }
+                }, {
+                    key: 'flagDown',
+                    value: function flagDown(ctrl, e) {
+                        ctrl.downAt = [e.clientX, e.clientY];
+                        ctrl.hadFocus = this.getInput(this.getChat(e.target)) == document.activeElement;
+                    }
+                }, {
+                    key: 'chatClick',
+                    value: function chatClick(ctrl, e) {
+                        // Get the chat div from the event target
+                        var chat = this.getChat(e.target);
+
+                        // Find the input element
+                        var input = this.getInput(chat);
+
+                        var current = +new Date();
+                        var targetTag = e.target.tagName.toLowerCase();
+                        var samePlace = ctrl.downAt[0] == e.clientX && ctrl.downAt[1] == e.clientY;
+                        if (targetTag == "div" && samePlace || !ctrl.hadFocus && samePlace && current - ctrl.lastClick > 300) {
+                            input.focus();
+                            ctrl.hadFocus = true;
+                        } else {
+                            m.redraw.strategy('none');
+                        }
+                        ctrl.lastClick = current;
+
+                        return targetTag == "a";
+                    }
+                }, {
                     key: 'view',
-                    value: function view() {
-                        return m('div', { className: 'chat left container ' + (this.status.beingShown ? '' : 'hidden') }, [m('div', {
+                    value: function view(ctrl, args) {
+                        for (var i = 0; i < args.forward.length; ++i) {
+                            this.forwardMessage(ctrl, args.forward[i], false);
+                        }
+
+                        return m('div', { className: 'chat left container ' + (ctrl.beingShown ? '' : 'hidden') }, [m('div', {
                             tabindex: 0,
                             className: 'frame',
                             id: 'chat',
-                            onfocusin: this.focusIn.bind(this),
-                            onfocusout: this.focusOut.bind(this),
-                            onclick: this.focusInput.bind(this),
-                            onmousedown: this.flagDown.bind(this),
-                            onmousemove: this.flagDrag.bind(this),
-                            onmouseup: this.flagUp.bind(this)
-                        }, [m('div', { id: 'chat-header', onclick: this.toggle.bind(this) }, [m('h2', 'PushEdx Chat'), m('p', {
-                            'data-title': this.status.isMuted ? 'Habilitar sonidos' : 'Deshabilitar sonidos'
+                            //onfocusin: this.focusIn.bind(this),
+                            //onfocusout: this.focusOut.bind(this),
+                            //onclick: this.focusInput.bind(this),
+                            onmousedown: this.flagDown.bind(this, ctrl),
+                            //onmousemove: this.flagDrag.bind(this),
+                            //onmouseup: this.flagUp.bind(this),
+                            onclick: this.chatClick.bind(this, ctrl)
+                        }, [m('div', { id: 'chat-header', onclick: this.toggle.bind(this, ctrl) }, [m('h2', 'PushEdx Chat'), m('p', {
+                            'data-title': ctrl.isMuted ? 'Habilitar sonidos' : 'Deshabilitar sonidos'
                         }, [m('img', {
-                            src: this.status.isMuted ? soundMuted : soundNormal,
-                            onclick: this.toggleSound.bind(this)
+                            src: ctrl.isMuted ? soundMuted : soundNormal,
+                            onclick: this.toggleSound.bind(this, ctrl)
                         })]), m('p', {
-                            'data-title': this.status.notify ? 'Deshabilitar notificaciones' : 'Habilitar notificaciones'
+                            'data-title': ctrl.notify ? 'Deshabilitar notificaciones' : 'Habilitar notificaciones'
                         }, [m('img', {
-                            src: this.status.notify ? notifyNormal : notifyDisabled,
-                            onclick: this.toggleNotifications.bind(this)
-                        })])]), this.status.loading ? LoadingIndicator.component({ className: 'loading Button-icon' }) : m('span'), m('div', {
+                            src: ctrl.notify ? notifyNormal : notifyDisabled,
+                            onclick: this.toggleNotifications.bind(this, ctrl)
+                        })])]), ctrl.loading ? LoadingIndicator.component({ className: 'loading Button-icon' }) : m('span'), m('div', {
                             className: 'wrapper',
-                            config: this.scroll.bind(this),
-                            onscroll: this.disableAutoScroll.bind(this)
-                        }, [this.status.loadingOld ? m('div', { className: 'message-wrapper' }, [m('span', { className: 'message' }, LoadingIndicator.component({ className: 'loading-old Button-icon' })), m('div', { className: 'clear' })]) : undefined, this.status.messages.map(function (o) {
+                            config: this.scroll.bind(this, ctrl),
+                            onscroll: this.disableAutoScroll.bind(this, ctrl)
+                        }, [ctrl.loadingOld ? m('div', { className: 'message-wrapper' }, [m('span', { className: 'message' }, LoadingIndicator.component({ className: 'loading-old Button-icon' })), m('div', { className: 'clear' })]) : undefined, ctrl.messages.map(function (o) {
                             return m('div', { className: 'message-wrapper' }, [m('span', { className: 'avatar-wrapper', 'data-name': o.user ? o.user.username() : 'Loading...' }, avatar(o.user, { className: 'avatar', onclick: this.insertReference.bind(this, o.user) })), m('span', { className: 'message', 'data-message': o.message, config: this.parseMessage.bind(this) }), m('div', { className: 'clear' })]);
                         }.bind(this))]), m('input', {
                             type: 'text',
                             id: 'chat-input',
-                            className: this.reachedLimit() ? 'reaching-limit' : '',
+                            className: this.reachedLimit(ctrl) ? 'reaching-limit' : '',
                             maxlength: maxLength,
                             disabled: !app.forum.attribute('canPostChat'),
                             placeholder: app.forum.attribute('canPostChat') ? '' : 'Solo los usuarios registrados pueden usar el chat',
-                            onkeyup: this.process.bind(this),
-                            onkeydown: this.checkLimit.bind(this),
-                            config: this.refocus.bind(this)
+                            onkeyup: this.process.bind(this, ctrl),
+                            onkeydown: this.checkLimit.bind(this, ctrl),
+                            config: this.refocus.bind(this, ctrl)
                         }), m('span', {
                             id: 'chat-limitter',
-                            className: this.reachedLimit() ? 'reaching-limit' : ''
-                        }, "" + (maxLength - (this.status.oldlength || 0)))])]);
+                            className: this.reachedLimit(ctrl) ? 'reaching-limit' : ''
+                        }, "" + (maxLength - (ctrl.oldlength || 0)))])]);
                     }
                 }, {
                     key: 'process',
-                    value: function process(e) {
+                    value: function process(ctrl, e) {
                         var msg = e.target.value;
 
-                        if (e.keyCode == 13 && !this.status.loading) {
+                        if (e.keyCode == 13 && !ctrl.loading) {
                             // Assert the message is not empty
                             if (msg.trim().length == 0) {
                                 m.redraw.strategy('none');
@@ -350,11 +321,11 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             var data = new FormData();
                             data.append('msg', msg);
 
-                            this.status.loading = true;
-                            this.status.oldlength = 0;
+                            ctrl.loading = true;
+                            ctrl.oldlength = 0;
                             e.target.value = '';
 
-                            this.forwardMessage({ message: msg, actorId: app.session.user.id(), id: +new Date() }, false, true);
+                            this.forwardMessage(ctrl, { message: msg, actorId: app.session.user.id(), id: +new Date() }, false, true);
 
                             app.request({
                                 method: 'POST',
@@ -363,24 +334,24 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                                     return raw;
                                 },
                                 data: data
-                            }).then(this.success.bind(this), this.failure.bind(this));
-                        } else if (!this.status.oldReached) {
+                            }).then(this.success.bind(this, ctrl), this.failure.bind(this, ctrl));
+                        } else if (!ctrl.oldReached) {
                             m.redraw.strategy('none');
                         }
                     }
                 }, {
                     key: 'checkLimit',
-                    value: function checkLimit(e) {
+                    value: function checkLimit(ctrl, e) {
                         var redraw = false;
                         var now = +new Date();
-                        if (!this.status.lastChecked || now > this.status.lastChecked + 50) {
-                            this.status.lastChecked = now;
+                        if (!ctrl.lastChecked || now > ctrl.lastChecked + 50) {
+                            ctrl.lastChecked = now;
 
                             // Save length
                             var msg = e.target.value;
-                            this.status.oldlength = msg.length;
+                            ctrl.oldlength = msg.length;
 
-                            if (this.status.oldReached || this.reachedLimit()) {
+                            if (ctrl.oldReached || this.reachedLimit(ctrl)) {
                                 redraw = true;
                             }
                         }
@@ -391,26 +362,25 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                     }
                 }, {
                     key: 'failure',
-                    value: function failure(message) {
+                    value: function failure(ctrl, message) {
                         // todo show popup
-                        console.log("FAIL: " + message);
-                        this.status.loading = false;
+                        ctrl.loading = false;
                         m.redraw();
                     }
                 }, {
                     key: 'success',
-                    value: function success(response) {
+                    value: function success(ctrl, response) {
                         // End loading
-                        this.status.loading = false;
+                        ctrl.loading = false;
 
                         // Redraw now
                         m.redraw();
                     }
                 }, {
                     key: 'forwardMessage',
-                    value: function forwardMessage(message, notify, redraw) {
+                    value: function forwardMessage(ctrl, message, notify, redraw) {
                         var user = app.store.getById('users', message.actorId);
-                        var obj = this.addMessage(message.id, message.message, user, notify, redraw);
+                        var obj = this.addMessage(ctrl, message.id, message.message, user, notify, redraw);
 
                         if (user == undefined) {
                             app.store.find('users', message.actorId).then(function (user) {
@@ -421,23 +391,23 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                     }
                 }, {
                     key: 'addMessage',
-                    value: function addMessage(id, msg, user, notify, redraw) {
+                    value: function addMessage(ctrl, id, msg, user, notify, redraw) {
                         // Do note "messages" is a "set", thus = is a function
                         var obj = new ChatMessage(id, user, msg);
-                        this.status.messages = obj;
+                        ctrl.messages.push(obj);
 
                         // End loading
-                        this.status.loading = false;
+                        ctrl.loading = false;
 
                         // Redraw now
                         if (typeof redraw === "undefined" || redraw) {
-                            this.status.hadFocus = document.activeElement === this.input;
+                            ctrl.hadFocus = document.activeElement === this.input;
                             m.redraw();
                         }
 
                         // Notify (if we are not the author!)
                         if ((typeof notify === "undefined" || notify) && user && user.id() != app.session.user.id()) {
-                            this.notify(msg);
+                            this.notify(ctrl, msg);
                         }
 
                         // Return the object
@@ -445,30 +415,30 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                     }
                 }, {
                     key: 'notify',
-                    value: function notify(msg) {
-                        if (this.status.notify) {
+                    value: function notify(ctrl, msg) {
+                        if (ctrl.notify) {
                             if (!("Notification" in window)) {
                                 return;
                             } else if (Notification.permission === "granted") {
                                 var notification = new Notification(msg);
-                                this.notifySound(msg);
+                                this.notifySound(ctrl, msg);
                             } else if (Notification.permission !== 'denied') {
                                 Notification.requestPermission(function (permission) {
                                     if (permission === "granted") {
                                         var notification = new Notification(msg);
 
-                                        this.notifySound(msg);
+                                        this.notifySound(ctrl, msg);
                                     }
                                 }.bind(this));
                             }
                         } else {
-                            this.notifySound(msg);
+                            this.notifySound(ctrl, msg);
                         }
                     }
                 }, {
                     key: 'notifySound',
-                    value: function notifySound(msg) {
-                        if (!this.status.isMuted) {
+                    value: function notifySound(ctrl, msg) {
+                        if (!ctrl.isMuted) {
                             var sound = msg.indexOf('@' + app.session.user.username()) >= 0 ? refAudio : audio;
                             sound.currentTime = 0;
                             sound.play();
@@ -499,37 +469,15 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
 
             app.initializers.add('pushedx-realtime-chat', function (app) {
 
-                var showStatus = localStorage.getItem('beingShown');
-                var isMuted = localStorage.getItem('isMuted');
-                var notify = localStorage.getItem('notify');
-
-                var status = {
-                    loading: false,
-                    autoScroll: true,
-                    oldScroll: 0,
-                    callback: null,
-                    beingShown: showStatus === null ? true : JSON.parse(showStatus),
-                    isMuted: isMuted === null ? true : JSON.parse(isMuted),
-                    notify: notify === null ? false : JSON.parse(notify),
-
-                    _init: false,
-                    _messages: [],
-
-                    get messages() {
-                        return this._messages;
-                    },
-
-                    set messages(message) {
-                        this._messages.push(message);
-                    }
-                };
+                var forward = [];
 
                 extend(HeaderPrimary.prototype, 'config', function (x, isInitialized, context) {
                     if (isInitialized) return;
 
                     app.pusher.then(function (channels) {
                         channels.main.bind('newChat', function (data) {
-                            status.forwardMessage(data);
+                            forward.append(data);
+                            m.redraw();
                         });
 
                         extend(context, 'onunload', function () {
@@ -538,7 +486,8 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                     });
 
                     // Just loaded? Fetch last 10 messages
-                    if (status.messages.length == 0) {
+                    if (forward.length == 0) {
+                        console.log('Loading');
                         var data = new FormData();
                         data.append('id', -1);
 
@@ -551,8 +500,9 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                             data: data
                         }).then(function (response) {
                             for (var i = 0; i < response.data.attributes.messages.length; ++i) {
-                                status.forwardMessage(response.data.attributes.messages[i], false);
+                                forward.push(response.data.attributes.messages[i]);
                             }
+                            m.redraw();
                         }, function (response) {});
                     }
                 });
@@ -561,16 +511,17 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                  * Add the upload button to the post composer.
                  */
                 extend(HeaderPrimary.prototype, 'items', function (items) {
-                    var chatFrame = new ChatFrame();
-                    var realView = chatFrame.view;
+                    //var chatFrame = new ChatFrame();
+                    //var realView = chatFrame.view;
                     /*
                     chatFrame.view = () => {
                         return realView.call(chatFrame);
                     };
                     */
-                    chatFrame.status = status;
-                    status.forwardMessage = chatFrame.forwardMessage.bind(chatFrame);
-                    items.add('pushedx-chat-frame', chatFrame);
+                    //status.forwardMessage = chatFrame.forwardMessage.bind(chatFrame);
+                    var forwarded = forward.slice(0);
+                    items.add('pushedx-chat-frame', m.component(new ChatFrame(), { forward: forwarded }));
+                    forward.splice(0, forward.length);
                 });
             });
         }
