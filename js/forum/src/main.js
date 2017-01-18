@@ -12,7 +12,7 @@ app.initializers.add('pushedx-realtime-chat', app => {
 
         app.pusher.then(channels => {
             channels.main.bind('newChat', data => {
-                forward.append(data);
+                forward.push(data);
                 m.redraw();
             });
 

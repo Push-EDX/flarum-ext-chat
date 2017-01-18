@@ -344,8 +344,6 @@ export class ChatFrame extends Component {
             ctrl.oldlength = 0;
             e.target.value = '';
 
-            this.forwardMessage(ctrl, {message: msg, actorId: app.session.user.id(), id: +new Date()}, false, true);
-
             app.request({
                 method: 'POST',
                 url: app.forum.attribute('apiUrl') + '/chat/post',
