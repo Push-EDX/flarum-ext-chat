@@ -1,12 +1,12 @@
 <?php
 /*
- * This file is part of flagrow/flarum-ext-image-upload.
+ * This file is part of push-edx/flarum-ext-restricted-reply.
  *
- * Copyright (c) Flagrow.
+ * Copyright (c) gpascualg.
  *
- * http://flagrow.github.io
+ * http://pushedx.net
  *
- * For the full copyright and license information, please view the license.md
+ * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
