@@ -442,26 +442,21 @@ export class ChatFrame extends Component {
 
     notify(ctrl, msg) {
         if (ctrl.notify) {
-            if (!("Notification" in window)) {
-                return;
+            if (window.Notification) {
+                if (Notification.permission === "granted") {
+                    var notification = new Notification(msg);
+                }
+                else if (Notification.permission !== 'denied') {
+                    Notification.requestPermission((function (permission) {
+                        if (permission === "granted") {
+                            var notification = new Notification(msg);
+                        }
+                    }).bind(this));
+                }
             }
-            else if (Notification.permission === "granted") {
-                var notification = new Notification(msg);
-                this.notifySound(ctrl, msg);
-            }
-            else if (Notification.permission !== 'denied') {
-                Notification.requestPermission((function (permission) {
-                    if (permission === "granted") {
-                        var notification = new Notification(msg);
+        }
 
-                        this.notifySound(ctrl, msg);
-                    }
-                }).bind(this));
-            }
-        }
-        else {
-            this.notifySound(ctrl, msg);
-        }
+        this.notifySound(ctrl, msg);
     }
 
     notifySound(ctrl, msg) {
