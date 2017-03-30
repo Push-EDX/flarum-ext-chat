@@ -29,7 +29,7 @@ class AddClientAssets
     {
         $events->listen(ConfigureWebApp::class, [$this, 'addForumAssets']);
         $events->listen(ConfigureWebApp::class, [$this, 'addAdminAssets']);
-        //$events->listen(ConfigureLocales::class, [$this, 'addLocales']);
+        $events->listen(ConfigureLocales::class, [$this, 'addLocales']);
     }
 
     /**
@@ -72,7 +72,7 @@ class AddClientAssets
     public function addLocales(ConfigureLocales $event)
     {
         foreach (new DirectoryIterator(__DIR__.'/../../locale') as $file) {
-            if ($file->isFile() && in_array($file->getExtension(), ['yml', 'yaml'])) {
+            if ($file->isFile() && $file->getExtension() === 'yaml') {
                 $event->locales->addTranslations($file->getBasename('.'.$file->getExtension()), $file->getPathname());
             }
         }

@@ -1,0 +1,10 @@
+pushedx-chat:
+  forum:
+    toolbar:
+      title: Chat
+      enable_sounds: Zapnout zvuky
+      disable_sounds: Vypnout zvuky
+      enable_notifications: Zapnout oznámení
+      disable_notifications: Vypnout oznámení
+    errors:
+      unauthenticated: Do chatu mohou přispívat pouze registrovaní uživatelé

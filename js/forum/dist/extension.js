@@ -275,13 +275,13 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             //onmousemove: this.flagDrag.bind(this),
                             //onmouseup: this.flagUp.bind(this),
                             onclick: this.chatClick.bind(this, ctrl)
-                        }, [m('div', { id: 'chat-header', onclick: this.toggle.bind(this, ctrl) }, [m('h2', 'PushEdx Chat'), m('p', {
-                            'data-title': ctrl.isMuted ? 'Habilitar sonidos' : 'Deshabilitar sonidos'
+                        }, [m('div', { id: 'chat-header', onclick: this.toggle.bind(this, ctrl) }, [m('h2', app.translator.trans('pushedx-chat.forum.toolbar.title')), m('p', {
+                            'data-title': ctrl.isMuted ? app.translator.trans('pushedx-chat.forum.toolbar.enable_sounds') : app.translator.trans('pushedx-chat.forum.toolbar.disable_sounds')
                         }, [m('img', {
                             src: ctrl.isMuted ? soundMuted : soundNormal,
                             onclick: this.toggleSound.bind(this, ctrl)
                         })]), m('p', {
-                            'data-title': ctrl.notify ? 'Deshabilitar notificaciones' : 'Habilitar notificaciones'
+                            'data-title': ctrl.notify ? app.translator.trans('pushedx-chat.forum.toolbar.disable_notifications') : app.translator.trans('pushedx-chat.forum.toolbar.enable_notifications')
                         }, [m('img', {
                             src: ctrl.notify ? notifyNormal : notifyDisabled,
                             onclick: this.toggleNotifications.bind(this, ctrl)
@@ -297,7 +297,7 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             className: this.reachedLimit(ctrl) ? 'reaching-limit' : '',
                             maxlength: maxLength,
                             disabled: !app.forum.attribute('canPostChat'),
-                            placeholder: app.forum.attribute('canPostChat') ? '' : 'Solo los usuarios registrados pueden usar el chat',
+                            placeholder: app.forum.attribute('canPostChat') ? '' : app.translator.trans('pushedx-chat.forum.errors.unauthenticated'),
                             onkeyup: this.process.bind(this, ctrl),
                             onkeydown: this.checkLimit.bind(this, ctrl),
                             config: this.refocus.bind(this, ctrl)
@@ -324,8 +324,6 @@ System.register('pushedx/realtime-chat/components/ChatFrame', ['flarum/Component
                             ctrl.loading = true;
                             ctrl.oldlength = 0;
                             e.target.value = '';
-
-                            this.forwardMessage(ctrl, { message: msg, actorId: app.session.user.id(), id: +new Date() }, false, true);
 
                             app.request({
                                 method: 'POST',
@@ -476,7 +474,7 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
 
                     app.pusher.then(function (channels) {
                         channels.main.bind('newChat', function (data) {
-                            forward.append(data);
+                            forward.push(data);
                             m.redraw();
                         });
 
