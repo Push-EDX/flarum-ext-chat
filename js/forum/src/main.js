@@ -24,7 +24,6 @@ app.initializers.add('pushedx-realtime-chat', app => {
         {
             console.log('Loading');
             const data = new FormData();
-            data.append('id', -1);
 
             app.request({
                 method: 'POST',

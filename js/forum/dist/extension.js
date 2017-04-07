@@ -489,7 +489,6 @@ System.register('pushedx/realtime-chat/main', ['flarum/extend', 'flarum/componen
                     if (forward.length == 0) {
                         console.log('Loading');
                         var data = new FormData();
-                        data.append('id', -1);
 
                         app.request({
                             method: 'POST',
