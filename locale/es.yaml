@@ -1,0 +1,10 @@
+pushedx-chat:
+  forum:
+    toolbar:
+      title: PushEdx Chat
+      enable_sounds: Habilitar sonidos
+      disable_sounds: Deshabilitar sonidos
+      enable_notifications: Habilitar notificaciones
+      disable_notifications: Deshabilitar notificaciones
+    errors:
+      unauthenticated: Solo los usuarios registrados pueden usar el chat
