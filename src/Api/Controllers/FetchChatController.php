@@ -12,9 +12,10 @@
 
 namespace PushEDX\Chat\Api\Controllers;
 
-use \PDO;
+use Carbon\Carbon;
 use PushEDX\Chat\Api\Serializers\FetchChatSerializer;
 use PushEDX\Chat\Commands\FetchChat;
+use PushEDX\Chat\Message;
 use Flarum\Api\Controller\AbstractResourceController;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Psr\Http\Message\ServerRequestInterface;
@@ -44,52 +45,31 @@ class FetchChatController extends AbstractResourceController
         $this->bus = $bus;
     }
 
-    static public function GetDB()
+    static public function GetMessages($id = null)
     {
-        $db = new PDO('sqlite:/tmp/chatposts.db');
-        $db->exec('CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                                 actorId INTEGER,
-                                                 message varchar(2048))');
-
-        return $db;
-    }
-
-    static public function GetMessages($db, $id)
-    {
-        if ($id == -1)
+        if ($id === null)
         {
-            $stmt = $db->prepare('SELECT id, actorId, message FROM posts ORDER BY id DESC LIMIT 20;');
-            $result = $stmt->execute();
+            $msgs = Message::query()->orderBy('id', 'desc')->limit(20);
         }
         else
         {
-            $stmt = $db->prepare('SELECT id, actorId, message FROM posts WHERE id < :id ORDER BY id DESC LIMIT 20;');
-            $result = $stmt->execute(['id' => $id]);
+            $msgs = Message::query()->where('id', '<', $id)->orderBy('id', 'desc')->limit(20);
         }
 
-        $stmt->setFetchMode(PDO::FETCH_ASSOC);
-
-        $msgs = new \stdClass();
-        $msgs->messages = [];
-        while ($row = $stmt->fetch())
-        {
-            array_unshift($msgs->messages, $row);
-        }
-
-        return $msgs;
+        return $msgs->get()->reverse();
     }
 
     static public function UpdateMessages($msg)
     {
-        $db = FetchChatController::GetDB();
+        $message = Message::build(
+            $msg['message'],
+            $msg['actorId'],
+            new Carbon
+        );
 
-        $db->beginTransaction();
-        $stmt = $db->prepare('INSERT INTO posts (actorId, message) VALUES (?, ?);');
-        $stmt->execute([$msg['actorId'], $msg['message']]);
-        $id = $db->lastInsertId();
-        $db->commit();
+        $message->save();
 
-        return $id;
+        return $message->id;
     }
 
     /**
@@ -101,8 +81,12 @@ class FetchChatController extends AbstractResourceController
      */
     protected function data(ServerRequestInterface $request, Document $document)
     {
-        $id = $request->getParsedBody()['id'];
-        $msgs = FetchChatController::GetMessages(FetchChatController::GetDB(), $id);
+        if (isset($request->getParsedBody()['id'])) {
+            $id = $request->getParsedBody()['id'];
+            $msgs = FetchChatController::GetMessages($id);
+        } else {
+            $msgs = FetchChatController::GetMessages();
+        }
 
         return $this->bus->dispatch(
             new FetchChat($msgs)
