@@ -1,0 +1,10 @@
+pushedx-chat:
+  forum:
+    toolbar:
+      title: Sohbet
+      enable_sounds: Sesleri etinleştir
+      disable_sounds: Sesleri devre dışı bırak
+      enable_notifications: Bildirimleri etkinleştir
+      disable_notifications: Bildirimleri devre dışı bırak
+    errors:
+unauthenticated: Sadece kayıtlı kullanıcılar sohbeti kullanabilirler.
