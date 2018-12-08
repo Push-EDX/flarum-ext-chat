@@ -14,9 +14,9 @@ namespace PushEDX\Chat\Listeners;
 
 use Flarum\Settings\SettingsRepositoryInterface;
 use Illuminate\Contracts\Events\Dispatcher;
-use Flarum\Event\PrepareApiAttributes;
+use Flarum\Api\Event\Serializing;
 use Flarum\Api\Serializer\ForumSerializer;
-use Flarum\Event\PrepareUnserializedSettings;
+use Flarum\Settings\Event\Deserializing;
 use Cloudinary;
 
 class LoadSettingsFromDatabase
@@ -50,17 +50,17 @@ class LoadSettingsFromDatabase
      */
     public function subscribe(Dispatcher $events)
     {
-        $events->listen(PrepareUnserializedSettings::class, [$this, 'addUploadMethods']);
-        $events->listen(PrepareApiAttributes::class, [$this, 'prepareApiAttributes']);
+        $events->listen(Deserializing::class, [$this, 'addUploadMethods']);
+        $events->listen(Serializing::class, [$this, 'prepareApiAttributes']);
     }
 
     /**
      * Get the setting values from the database and make them available
      * in the forum.
      *
-     * @param PrepareApiAttributes $event
+     * @param Serializing $event
      */
-    public function prepareApiAttributes(PrepareApiAttributes $event)
+    public function prepareApiAttributes(Serializing $event)
     {
         if ($event->isSerializer(ForumSerializer::class)) {
             foreach ($this->fieldsToGet as $field) {
@@ -73,9 +73,9 @@ class LoadSettingsFromDatabase
      * Check for installed packages and provide the upload methods option
      * in the admin page-
      *
-     * @param PrepareUnserializedSettings $event
+     * @param Deserializing $event
      */
-    public function addUploadMethods(PrepareUnserializedSettings $event)
+    public function addUploadMethods(Deserializing $event)
     {
         // these are the upload methods that doesn't require external libraries
         $methods = [

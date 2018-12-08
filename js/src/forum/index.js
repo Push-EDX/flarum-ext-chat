@@ -1,7 +1,7 @@
 import { extend } from 'flarum/extend';
 import HeaderPrimary from 'flarum/components/HeaderPrimary';
 
-import {ChatFrame,ChatMessage} from 'pushedx/realtime-chat/components/ChatFrame';
+import {ChatFrame,ChatMessage} from './components/ChatFrame';
 
 app.initializers.add('pushedx-realtime-chat', app => {
 

@@ -12,7 +12,7 @@
 
 namespace PushEDX\Chat\Commands;
 
-use Flarum\Core\User;
+use Flarum\User\User;
 
 class PostChat
 {
