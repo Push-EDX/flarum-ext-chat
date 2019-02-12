@@ -16,12 +16,12 @@ use Carbon\Carbon;
 use PushEDX\Chat\Api\Serializers\FetchChatSerializer;
 use PushEDX\Chat\Commands\FetchChat;
 use PushEDX\Chat\Message;
-use Flarum\Api\Controller\AbstractResourceController;
+use Flarum\Api\Controller\AbstractShowController;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Psr\Http\Message\ServerRequestInterface;
 use Tobscure\JsonApi\Document;
 
-class FetchChatController extends AbstractResourceController
+class FetchChatController extends AbstractShowController
 {
 
     /**

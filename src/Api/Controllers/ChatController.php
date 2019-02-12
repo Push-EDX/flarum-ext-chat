@@ -14,12 +14,12 @@ namespace PushEDX\Chat\Api\Controllers;
 
 use PushEDX\Chat\Api\Serializers\ChatSerializer;
 use PushEDX\Chat\Commands\PostChat;
-use Flarum\Api\Controller\AbstractResourceController;
+use Flarum\Api\Controller\AbstractShowController;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Psr\Http\Message\ServerRequestInterface;
 use Tobscure\JsonApi\Document;
 
-class ChatController extends AbstractResourceController
+class ChatController extends AbstractShowController
 {
 
     /**
