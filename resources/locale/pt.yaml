@@ -1,0 +1,10 @@
+pushedx-chat:
+  forum:
+    toolbar:
+      title: Chat
+      enable_sounds: Habilitar sons
+      disable_sounds: Desabilitar sons
+      enable_notifications: Ativar notificações
+      disable_notifications: Desabilitar notificações
+    errors:
+      unauthenticated: Você precisa logar para mandar uma mensagem
